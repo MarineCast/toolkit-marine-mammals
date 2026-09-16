@@ -1,0 +1,222 @@
+schema_version: 6
+model_timezone: America/Los_Angeles
+full_area:
+  min_lon: -180.0
+  min_lat: 32.0
+  max_lon: -109.0
+  max_lat: 72.0
+model_universes:
+  SRKW:
+    polygon: data/processed/domain/whale_layer/spatial_support/SRKW_MODEL_DOMAIN.parquet
+    membership_rule: representative_point
+  TRANSIENT:
+    polygon: data/processed/domain/whale_layer/spatial_support/TRANSIENT_MODEL_DOMAIN.parquet
+    membership_rule: representative_point
+min_date: "1980-01-01"
+water_network_config: config/data/environment_seascape.yaml
+h3_resolutions: [4, 5, 6]
+frequencies: [daily, weekly]
+aggregation_chunk_periods: {daily: 31, weekly: 13}
+collection:
+  overlap_days: 2
+  sources:
+    twm:
+      enabled: true
+      local_path: data/raw/sightings/twm_export
+      timezone: America/Los_Angeles
+      source_license: UNKNOWN
+      source_use_class: INTERNAL_ONLY
+    acartia:
+      enabled: true
+      url: https://acartia.io/api/v1/sightings/current
+      local_path: data/raw/sightings/acartia_export
+      credential_env: ACARTIA_ACCESS_TOKEN
+      timezone: America/Los_Angeles
+      created_is_event_time: true
+      source_license: UNKNOWN
+      source_use_class: INTERNAL_ONLY
+    maplify:
+      enabled: true
+      url: https://maplify.com/waseak/php/search-all-sightings.php
+      timezone: America/Los_Angeles
+      min_date: "2020-01-01"
+      source_license: UNKNOWN
+      source_use_class: INTERNAL_ONLY
+      bbox:
+        min_lon: -136.0
+        min_lat: 36.0
+        max_lon: -120.0
+        max_lat: 54.0
+    inaturalist:
+      enabled: true
+      taxon_id: 41521
+      url: https://api.inaturalist.org/v1/observations
+      credential_env: INATURALIST_TOKEN
+      timezone: UTC
+      max_coordinate_uncertainty_m: 5000.0
+      source_license: UNKNOWN
+      source_use_class: INTERNAL_ONLY
+    cwr:
+      enabled: true
+      timezone: America/Los_Angeles
+      timeout_seconds: 30
+      max_retries: 3
+      archive_index_url: https://whaleresearch.wixsite.com/archives
+      archive_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023]
+      archive_year_url_template: https://whaleresearch.wixsite.com/{year}encounters
+      archive_fetch_workers: 8
+      coordinate_bounds:
+        min_lon: -130.0
+        min_lat: 45.0
+        max_lon: -120.0
+        max_lat: 52.0
+      atlist_api_root: https://api.atlist.com/v1/map
+      atlist_maps:
+        2024:
+          map_id: 3d6d0c96-06fb-4087-959c-1ecdcab167af
+          page_url: https://www.whaleresearch.com/encounters2024
+        2025:
+          map_id: 6d677a80-8764-481c-9228-abcb73cc56eb
+          page_url: https://www.whaleresearch.com/encounters
+        2026:
+          map_id: 4fdb0211-7443-48fb-9334-2c401932b4ba
+          page_url: https://www.whaleresearch.com/encounters-map-2026
+      source_license: UNKNOWN
+      source_use_class: INTERNAL_ONLY
+    gbif:
+      enabled: true
+      url: https://api.gbif.org/v1/occurrence/search
+      dataset_metadata_url: https://api.gbif.org/v1/dataset
+      timezone: UTC
+      min_date: "1980-01-01"
+      taxon_key: 74SZC
+      checklist_key: 7ddf754f-d193-4cc9-b351-99906754a03b
+      basis_of_record: HUMAN_OBSERVATION
+      occurrence_status: PRESENT
+      require_no_geospatial_issue: true
+      page_size: 300
+      max_search_results: 100000
+      max_coordinate_uncertainty_m: 5000.0
+      max_event_spread_km: 5.0
+      excluded_dataset_keys:
+        # iNaturalist Research-grade Observations; collected directly above.
+        - 50c9509d-22c7-4a22-a47d-8c48425ef4a7
+      dataset_allowlist:
+        - key: e0da2d53-86f0-440c-a11a-42ffb0b3fd3e
+          title: Happywhale - Killer whale in North Pacific Ocean
+          event_id_is_encounter: true
+          happywhale_exact_fallback: true
+          use_class: INTERNAL_ONLY
+        - key: 56687a3d-b48f-44e5-b2b8-d55bafff2f33
+          title: Galiano Island BC Canada Marine Zoology 1893-2021
+          use_class: INTERNAL_ONLY
+        - key: 8a863029-f435-446a-821e-275f4f641165
+          title: Observation.org, Nature data from around the World
+          use_class: INTERNAL_ONLY
+        - key: df396e97-bf8f-448b-8fe3-fa1315c87057
+          title: NMML 2002-2010 Bering Sea Shelf Cetacean Survey
+          use_class: INTERNAL_ONLY
+        - key: 730378a0-2049-4d38-a6e6-4dd52b80c5d4
+          title: SWFSC Marine Mammal Survey, CLAWS 2015, Cruise 1648
+          use_class: INTERNAL_ONLY
+        - key: 5dcaa90f-0ce2-46c4-b25e-7ba792429832
+          title: MMS Marine Mammal Survey, PNW 1989-1990
+          use_class: INTERNAL_ONLY
+        - key: 86214182-a35a-42a4-b810-6e8a45d3e2a0
+          title: GOALS Vessel Surveys June - July 2013
+          use_class: INTERNAL_ONLY
+        - key: 96fae9be-8455-4015-b447-a00f935e8e77
+          title: MMS High Altitude Survey 1980-1983
+          use_class: INTERNAL_ONLY
+        - key: 56dde455-657c-4e32-b1f1-c0eda47d7d70
+          title: NMML Harbor Porpoise Vessel, SE Alaska, Fall 1993
+          use_class: INTERNAL_ONLY
+        - key: e152d1e3-dac6-4165-92fa-d965bcb473fa
+          title: CalCOFI and NMFS Seabird and Marine Mammal Observation Data, 1987-2006
+          use_class: INTERNAL_ONLY
+        - key: eae32224-05a2-4e3c-90f8-77b1d22a850c
+          title: NMML Bering Sea Cetacean Survey 2000
+          use_class: INTERNAL_ONLY
+        - key: 08ecd719-2e5d-4de7-916d-b486c0dcc095
+          title: NMML Harbor Porpoise Vessel, SE Alaska, Fall 1992
+          use_class: INTERNAL_ONLY
+        - key: b3c493d1-9f93-454a-bccd-32b35bd0a70a
+          title: NMML Small Cetacean Aerial Survey 1998
+          use_class: INTERNAL_ONLY
+        - key: d16bb93c-0605-490e-8016-864ca5a5d772
+          title: NMML Harbor Porpoise Vessel Survey, SE Alaska, Summer 1992
+          use_class: INTERNAL_ONLY
+deduplication:
+  timestamp_tolerance_minutes: 15
+  distance_tolerance_m: 500
+kernel:
+  radius_km: 100.0
+  center_weight: 1.0
+  outer_weight: 0.015
+  exponent: 1.5
+  combine: noisy_or
+imputation:
+  inputs:
+    observations: data/processed/domain/whale_layer/sightings/observations.parquet
+    associations: data/processed/domain/whale_layer/sightings/associations.parquet
+    water_network_config: config/data/environment_seascape.yaml
+  artifacts:
+    models_dir: models/sighting_imputation
+    output: data/processed/domain/whale_layer/sightings/imputed_retrospective.parquet
+  regime: retrospective
+  evaluate_strategies: [reconstruction, encounter, blocked, purged_blocked]
+  feature:
+    max_radius_km: 40.0
+    distance_scale_km: 10.0
+    time_scale_days: 4.0
+    max_day_lag: 14
+    support_unit_km: 2.5
+    query_chunk_size: 5000
+    marine_fallback_to_haversine: false
+    max_target_snap_km: 5.0
+    strong_local_support_floor: 0.01
+    movement_speed_scale_km_per_day: 50.0
+    maximum_feasible_km_per_day: 150.0
+    marine_h3_resolution: 6
+    temporal_windows:
+      - [same_day, 0, 0]
+      - [past_1d, -1, -1]
+      - [past_2_3d, -3, -2]
+      - [past_4_7d, -7, -4]
+      - [past_8_14d, -14, -8]
+      - [future_1d, 1, 1]
+      - [future_2_3d, 2, 3]
+      - [future_4_7d, 4, 7]
+      - [future_8_14d, 8, 14]
+  model:
+    random_state: 42
+    n_splits: 3
+    model_kind: extra_trees
+    n_estimators: 150
+    max_features: 0.70
+    min_samples_leaf: 20
+    calibration_method: sigmoid
+    conformal_alpha: 0.10
+    target_selective_error: 0.05
+    risk_confidence: 0.95
+    min_policy_examples: 20
+    min_policy_accepts: 12
+    nested_decision_splits: 2
+    ood_contamination: 0.01
+    blocked_days: 7
+    blocked_km: 20.0
+    minimum_labeled_per_class: 30
+    max_evaluation_per_class: 5000
+    ood_n_estimators: 75
+    max_training_majority_ratio: 10.0
+    use_regime_experts: true
+    min_expert_examples: 100
+    enable_hyperparameter_tuning: true
+    tuning_max_candidates: 8
+    tuning_n_jobs: 2
+    enable_prediction_stability: true
+    maximum_stability_probability_shift: 0.20
+    hard_certification_min_accepts_per_class: 100
+    enable_hard_label_release: false
+    final_calibration_strategy: encounter
+    hard_label_certification_strategy: purged_blocked

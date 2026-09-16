@@ -1,0 +1,21 @@
+schema_version: 1
+domain_kind: operational_model_extent
+source_authority: OrcaCast reviewed operational model-domain contract
+source_release: operational-model-domains-v1
+approved_at: "2026-08-19T00:00:00Z"
+review_status: approved_for_model_domain
+areas_config: areas.yaml
+water_universe_root: data/processed/environment/seascape/full_counting
+resolutions: [4, 5, 6]
+domains:
+  SRKW:
+    area_key: srkw_range
+    source_reference: repo://config/common.yaml#areas.srkw_range
+    output: data/processed/domain/whale_layer/spatial_support/SRKW_MODEL_DOMAIN.parquet
+    expected_cells: {4: 182, 5: 964, 6: 5442}
+  TRANSIENT:
+    area_key: transient_range
+    source_reference: repo://config/common.yaml#areas.transient_range
+    output: data/processed/domain/whale_layer/spatial_support/TRANSIENT_MODEL_DOMAIN.parquet
+    expected_cells: {4: 421, 5: 2174, 6: 12480}
+expected_union_cells: {4: 421, 5: 2174, 6: 12480}

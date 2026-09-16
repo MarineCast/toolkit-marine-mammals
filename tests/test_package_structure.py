@@ -4,7 +4,6 @@ from importlib import import_module
 
 import marine_mammal_toolkit
 
-
 NAMESPACES = (
     "observations",
     "populations",
@@ -30,4 +29,5 @@ def test_package_version() -> None:
 
 def test_documented_namespaces_are_importable() -> None:
     for namespace in NAMESPACES:
-        assert import_module(f"marine_mammal_toolkit.{namespace}")
+        prefix = "" if namespace.startswith(("cetaceans", "pinnipeds")) else "tools."
+        assert import_module(f"marine_mammal_toolkit.{prefix}{namespace}")

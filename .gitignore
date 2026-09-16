@@ -8,3 +8,9 @@ dist/
 data/
 outputs/
 graphify-out/
+.ipynb_checkpoints/
+models/
+artifacts/
+cache/
+exports/
+reports/

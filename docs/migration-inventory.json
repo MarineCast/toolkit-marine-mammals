@@ -1,0 +1,470 @@
+{
+  "source_revision": "aba2a9f68452994fe07b72ada6d210f563e48871",
+  "files": [
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/configuration.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cetaceans/killer_whales/configuration.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/service.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cetaceans/killer_whales/observations/service.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/release.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cetaceans/killer_whales/observations/release.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/aggregation.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/post_process/aggregation.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/source_records.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/process/records.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/__init__.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cetaceans/killer_whales/observations/__init__.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/spatial.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/post_process/spatial.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/runtime.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/runtime.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/cwr.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/collect/sources/cwr.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/contracts.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/schemas/observations.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/collection.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/collect/pipeline.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/model_domains.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cetaceans/killer_whales/observations/domains.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/normalization.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/process/pipeline.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/migration.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/migration.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/release_pipeline.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cetaceans/killer_whales/pipeline.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/adapters.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/process/adapters.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/validation.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/quality/observations.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/counts.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/post_process/counts.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/metrics.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/metrics.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/service.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/service.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/config.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/config.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/certification.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/certification.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/io.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/io.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/policy.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/policy.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/__init__.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/__init__.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/features.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cetaceans/killer_whales/observations/features.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/visualization.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/visualization.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/model.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/model.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/cli.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cli.py",
+      "operation": "replace_entrypoint"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/pipeline.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/pipeline.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/settings.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/settings.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/splits.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/splits.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/__main__.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cli.py",
+      "operation": "replace_entrypoint"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/report.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/report.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/surface.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/surface.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/calibration.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/calibration.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/marine.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/marine.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/sightings/imputation/encounters.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/observations/impute/encounters.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/demography/prepare.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cetaceans/killer_whales/populations/prepare.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/core/artifacts/contracts.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/schemas/artifacts.py",
+      "operation": "shared_dependency_copy"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/core/artifacts/checksums.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/_core/checksums.py",
+      "operation": "shared_dependency_copy"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/core/data/contracts.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/schemas/stages.py",
+      "operation": "shared_dependency_copy"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/core/data/persistence.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/_core/persistence.py",
+      "operation": "shared_dependency_copy"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/core/data/registry.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/_core/registry.py",
+      "operation": "shared_dependency_copy"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/core/data/validation.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/quality/tables.py",
+      "operation": "shared_dependency_copy"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/core/data/catalog.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/cetaceans/killer_whales/catalog.py",
+      "operation": "shared_dependency_copy"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/core/config/document.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/_core/config/document.py",
+      "operation": "shared_dependency_copy"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/core/config/data.py",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/tools/_core/config/data.py",
+      "operation": "shared_dependency_copy"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/notebooks/01_retrospective_ecotype_imputation.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/notebooks/01_retrospective_ecotype_imputation.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/01_current_model_baseline.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/01_current_model_baseline.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/02_source_aware_open_set.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/02_source_aware_open_set.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/03_learned_spatiotemporal_transport.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/03_learned_spatiotemporal_transport.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/04_seasonal_static_seascape.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/04_seasonal_static_seascape.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/05_guarded_hierarchical_residual.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/05_guarded_hierarchical_residual.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/06_model_strategy_bakeoff.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/06_model_strategy_bakeoff.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/07_open_set_missingness_and_active_labeling.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/07_open_set_missingness_and_active_labeling.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/README.md",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/README.md",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/covariate_experiment.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/covariate_experiment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/experiment_support.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/experiment_support.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/guarded_residual_experiment.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/guarded_residual_experiment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/open_set_missingness_experiment.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/open_set_missingness_experiment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/strategy_bakeoff_experiment.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/strategy_bakeoff_experiment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/test_covariate_experiment.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/test_covariate_experiment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/test_guarded_residual_experiment.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/test_guarded_residual_experiment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/test_open_set_missingness_experiment.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/test_open_set_missingness_experiment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/test_strategy_bakeoff_experiment.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/test_strategy_bakeoff_experiment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/modeling/orca_ecotype_imputation/testing/transport_experiment.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/imputation/testing/transport_experiment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_configuration_and_provenance.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_configuration_and_provenance.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_counts_and_spatial.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_counts_and_spatial.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_cwr_source.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_cwr_source.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_gbif_source.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_gbif_source.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_imputation_report.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_imputation_report.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_imputation_safety.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_imputation_safety.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_ingestion_containment.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_ingestion_containment.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_marine_and_model_policy.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_marine_and_model_policy.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_model_domains.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_model_domains.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_normalization_polars_state.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_normalization_polars_state.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_normalization_quality_contract.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_normalization_quality_contract.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/tests/domains/whale/test_sightings_release.py",
+      "target": "Toolkits/toolkit-marine-mammals/tests/killer_whales/test_sightings_release.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/data/cwr_sightings/03_CWR_2017_2026_ALL_ARCHIVES_REPORT_AND_EXPORT.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/sources/cwr/03_CWR_2017_2026_ALL_ARCHIVES_REPORT_AND_EXPORT.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/data/cwr_sightings/02_CWR_2024_2026_ECOTYPE_REPORT_AND_EXPORT.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/sources/cwr/02_CWR_2024_2026_ECOTYPE_REPORT_AND_EXPORT.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/data/cwr_sightings/01_CWR_ENCOUNTER_DATA_RECONNAISSANCE.ipynb",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/sources/cwr/01_CWR_ENCOUNTER_DATA_RECONNAISSANCE.ipynb",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/notebooks/data/cwr_sightings/build_cwr_potential_source_report.py",
+      "target": "Toolkits/toolkit-marine-mammals/notebooks/cetaceans/killer_whales/sources/cwr/build_cwr_potential_source_report.py",
+      "operation": "relocate_source"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/README.md",
+      "target": "Toolkits/toolkit-marine-mammals/docs/reference/orcacast-before-migration/whale-overview.md",
+      "operation": "relocate_historical_documentation"
+    },
+    {
+      "source": "Modeling/OrcaCast/src/orcacast/domains/whale/SPATIAL_SUPPORT.md",
+      "target": "Toolkits/toolkit-marine-mammals/docs/reference/orcacast-before-migration/spatial-support.md",
+      "operation": "relocate_historical_documentation"
+    },
+    {
+      "source": "Modeling/OrcaCast/docs/data_sources/sightings.md",
+      "target": "Toolkits/toolkit-marine-mammals/docs/reference/orcacast-before-migration/sightings-sources.md",
+      "operation": "relocate_historical_documentation"
+    },
+    {
+      "source": "Modeling/OrcaCast/docs/architecture/sightings_pipeline.md",
+      "target": "Toolkits/toolkit-marine-mammals/docs/reference/orcacast-before-migration/sightings-pipeline.md",
+      "operation": "relocate_historical_documentation"
+    },
+    {
+      "source": "Modeling/OrcaCast/config/data/sightings.yaml",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/resources/killer_whales/sightings.yaml",
+      "operation": "package_canonical_configuration"
+    },
+    {
+      "source": "Modeling/OrcaCast/config/data/whale.yaml",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/resources/killer_whales/populations.yaml",
+      "operation": "package_canonical_configuration"
+    },
+    {
+      "source": "Modeling/OrcaCast/config/data/whale/model_domains.yaml",
+      "target": "Toolkits/toolkit-marine-mammals/src/marine_mammal_toolkit/resources/killer_whales/model_domains.yaml",
+      "operation": "package_canonical_configuration"
+    }
+  ],
+  "untouched": [
+    "raw data",
+    "generated products",
+    "trained models",
+    "generated research outputs"
+  ],
+  "additional_extractions": [
+    "source clients and HTTP retry",
+    "species interpretation and count policies",
+    "generic census validation",
+    "imputation component injection",
+    "public seascape integration",
+    "versioned model envelope",
+    "standalone CLI and installed configurations"
+  ]
+}

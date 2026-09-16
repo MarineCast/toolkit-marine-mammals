@@ -1,0 +1,4 @@
+# DEMOGRAPHY DATA PARAMETERS
+population_source_path: data/raw/orca_population/Number of Southern Resident killer whales.xlsx # Input SRKW population workbook.
+population_output_path: data/processed/domain/whale_layer/population/SRKW_POPULATION_COUNTS.json # App-ready population counts JSON output.
+population_sheet_name: Chart Data # Workbook sheet containing population count rows.

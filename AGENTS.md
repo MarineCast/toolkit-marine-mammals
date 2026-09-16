@@ -6,8 +6,11 @@ This repository owns reusable marine-mammal observation, population, taxonomy, t
 acoustic, schema, and quality-control code. Species and clade-specific namespaces live beneath
 `cetaceans` and `pinnipeds`.
 
-The repository is currently an installable namespace scaffold. A directory's presence does not
-mean that its pipeline, source integration, or data product is implemented.
+Killer-whale observations and census processing are implemented. Shared engines live in
+`tools/observations/{collect,process,impute,post_process}` and `tools/populations`;
+species interpretation, feature construction, acceptance policy, release profiles, and census
+presentation live in `cetaceans/killer_whales`. Other species remain extension points.
+Read `docs/migration.md` before changing compatibility or ownership boundaries.
 
 ## Shared MarineCast context
 
@@ -30,10 +33,23 @@ require an OrcaCast checkout at runtime.
   storage and redistribution rights before adding acquisition workflows.
 - Species-specific transformations belong in their species namespace when they are not valid for
   marine mammals generally.
+- Binary SRKW/Transient inference is observation-label imputation, not occurrence forecasting.
+  Preserve known-Other mass, abstention, encounter isolation, and purged certification gates.
+- Legacy Joblib models must fail before deserialization with a refit instruction. Model loading
+  must not grant soft-count certification. Never rewrite existing trained models during migration.
+- Require an explicit workspace for relative data/model/output paths. Includes resolve relative
+  to their declaring file. Canonical configs are installed resources, not checkout paths.
+- Seascape is a declared dependency; use its public water-network API through the explicit-base
+  integration helper. `SEASCAPE_WORKSPACE` selects its named-area configuration. Never copy producers.
+- Dataset identifiers, `orca:v4:` identities, Arrow schemas, rights and missingness remain compatible.
+  Source-content producer revisions intentionally change under the toolkit namespace.
 
 ## Validation
 
-Before edits, run `git status --short` and preserve unrelated changes. For scaffold and
-documentation changes, run `python -m pytest` and `git diff --check`. Add focused tests and exact
-commands when executable behavior is introduced. Report acquisition, regional builds, and
-application integration as unverified unless they were actually run.
+Before edits, run `git status --short` and preserve unrelated changes. Run `python -m pytest tests`
+and `python -m pytest notebooks/cetaceans/killer_whales/imputation/testing --import-mode=prepend`.
+Run `git diff --check` and installed-wheel/CLI smoke checks after packaging changes. The integration
+tests use only synthetic temporary storage. Do not run live acquisition, production fitting,
+artifact rewriting, or release promotion as part of ordinary validation.
+No local structural graph is present yet; use scoped source search. Any future Graphify cache
+must stay disposable and local-only, and must be built from this checkout, not MarineCast root.
