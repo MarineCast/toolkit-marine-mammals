@@ -1,0 +1,22 @@
+Repo structure
+marine-mammal-toolkit/
+└── src/marine_mammal_toolkit/
+    ├── observations/
+    ├── populations/
+    ├── taxonomy/
+    ├── telemetry/
+    ├── acoustic/
+    ├── schemas/
+    ├── quality/
+    │
+    ├── cetaceans/
+    │   ├── killer_whales/
+    │   ├── humpbacks/
+    │   └── gray_whales/
+    │
+    └── pinnipeds/
+        ├── haulouts/
+        ├── seals/
+        └── sea_lions/
+
+Relocate sghtings data here. 
