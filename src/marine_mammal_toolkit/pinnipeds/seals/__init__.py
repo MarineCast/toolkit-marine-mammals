@@ -1,0 +1,1 @@
+"""Seal-specific domain processing."""
