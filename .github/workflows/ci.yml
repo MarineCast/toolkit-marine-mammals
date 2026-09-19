@@ -1,0 +1,53 @@
+name: Offline package checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install pinned toolkit dependency
+        run: >-
+          python -m pip install
+          'toolkit-seascape @ git+https://github.com/MarineCast/toolkit-seascape.git@deeb1974c4f5270c831d5dc96e902b3b43a4d4dd'
+      - run: python -m pip install -e '.[dev]'
+      - run: python -m pip check
+      - run: python -m pytest tests -q
+      - run: python -m pytest notebooks/cetaceans/killer_whales/imputation/testing --import-mode=prepend -q
+      - run: marine-mammals --help
+      - run: python -m pip wheel . --no-deps --wheel-dir "$RUNNER_TEMP/dist"
+      - name: Installed wheel smoke test
+        run: |
+          wheel_env="$RUNNER_TEMP/wheel-env"
+          python -m venv --system-site-packages "$wheel_env"
+          "$wheel_env/bin/python" -m pip install \
+            --force-reinstall --no-deps "$RUNNER_TEMP"/dist/*.whl
+          outside="$RUNNER_TEMP/wheel-smoke"
+          mkdir -p "$outside"
+          cd "$outside"
+          "$wheel_env/bin/python" - <<'PY'
+          from importlib.resources import files
+
+          import marine_mammal_toolkit
+          import marine_mammal_toolkit.cetaceans.killer_whales.pipeline
+
+          root = files("marine_mammal_toolkit")
+          required = (
+              "py.typed",
+              "resources/killer_whales/areas.yaml",
+              "resources/killer_whales/model_domains.yaml",
+              "resources/killer_whales/populations.yaml",
+              "resources/killer_whales/sightings.yaml",
+          )
+          assert all(root.joinpath(*path.split("/")).is_file() for path in required)
+          PY
+          "$wheel_env/bin/marine-mammals" --help
+      - run: git diff --check
