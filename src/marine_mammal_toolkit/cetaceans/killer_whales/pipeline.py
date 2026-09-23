@@ -66,6 +66,8 @@ class SightingsPipelineRunRequest:
     run_id: str | None = None
     offline: bool = False
     twm_files: tuple[Path, ...] = ()
+    persistent_state: bool = False
+    full_refresh: bool = True
     force: bool = False
     resume: bool = False
 
@@ -125,9 +127,7 @@ def _load_run_manifest(path: Path) -> RunManifest:
 
 
 def _latest_collect(data_root: Path) -> StageResult:
-    release_pointer = (
-        data_root / "processed/domain/whale_layer/sightings/releases/latest.json"
-    )
+    release_pointer = data_root / "processed/sightings/final/releases/latest.json"
     if release_pointer.is_file():
         release_manifest_path = resolve_sightings_release_manifest(release_pointer)
         payload = json.loads(release_manifest_path.read_text(encoding="utf-8"))
@@ -571,24 +571,8 @@ def run_sightings_pipeline(
 ) -> SightingsPipelineRunResult:
     """Execute the manifest-linked DAG in isolation, then promote one generation."""
 
-    from marine_mammal_toolkit.tools.observations.post_process.aggregation import (
-        build_intensity,
-    )
-    from marine_mammal_toolkit.tools.observations.post_process.aggregation import (
-        build_model_grid,
-    )
     from marine_mammal_toolkit.tools.observations.collect.pipeline import (
         collect_sightings,
-    )
-    from marine_mammal_toolkit.tools.observations.post_process.counts import (
-        build_counts,
-    )
-    from marine_mammal_toolkit.cetaceans.killer_whales.observations.imputation import (
-        fit_imputation_model,
-    )
-    from marine_mammal_toolkit.tools.observations.impute.service import impute_sightings
-    from marine_mammal_toolkit.tools.observations.impute.settings import (
-        load_imputation_settings,
     )
     from marine_mammal_toolkit.tools.observations.process.pipeline import (
         normalize_sightings,
@@ -601,11 +585,22 @@ def run_sightings_pipeline(
         f"{datetime.now(timezone.utc):%H%M%S}"
     )
     candidate_root = (
-        request.data_root.resolve() / "_sightings_release_candidates" / run_id
+        request.data_root.resolve()
+        / (
+            "_sightings_product_runs"
+            if request.persistent_state
+            else "_sightings_release_candidates"
+        )
+        / run_id
     )
-    candidate_data = candidate_root / "data"
-    candidate_artifacts = candidate_root / "artifacts"
-    candidate_outputs = candidate_root / "outputs"
+    if request.persistent_state:
+        candidate_data = request.data_root.resolve()
+        candidate_artifacts = request.artifact_root.resolve()
+        candidate_outputs = request.output_root.resolve()
+    else:
+        candidate_data = candidate_root / "data"
+        candidate_artifacts = candidate_root / "artifacts"
+        candidate_outputs = candidate_root / "outputs"
     if candidate_root.exists() and any(candidate_root.iterdir()) and not request.resume:
         raise FileExistsError(
             f"Sightings release candidate already exists: {candidate_root}"
@@ -628,7 +623,9 @@ def run_sightings_pipeline(
                 start_date=request.start_date,
                 end_date=request.end_date,
                 twm_files=request.twm_files,
-                full_refresh=True,
+                full_refresh=(
+                    request.full_refresh if request.persistent_state else True
+                ),
             )
         )
     stages["normalize"] = normalize_sightings(
@@ -676,6 +673,16 @@ def run_sightings_pipeline(
     imputed: ArtifactRef | None = None
     model_manifest: RunManifest | None = None
     if profile.include_imputation:
+        from marine_mammal_toolkit.cetaceans.killer_whales.observations.imputation import (
+            fit_imputation_model,
+        )
+        from marine_mammal_toolkit.tools.observations.impute.service import (
+            impute_sightings,
+        )
+        from marine_mammal_toolkit.tools.observations.impute.settings import (
+            load_imputation_settings,
+        )
+
         workflow = load_imputation_settings(request.config)
         fit = fit_imputation_model(
             observations_path=observations.path,
@@ -755,6 +762,10 @@ def run_sightings_pipeline(
         gates.extend(_imputation_gates(None))
 
     if profile.include_counts:
+        from marine_mammal_toolkit.tools.observations.post_process.counts import (
+            build_counts,
+        )
+
         universes = _universe_artifacts(
             request.data_root.resolve(), profile.resolutions
         )
@@ -794,6 +805,10 @@ def run_sightings_pipeline(
             }
         )
     if profile.include_model_grid:
+        from marine_mammal_toolkit.tools.observations.post_process.aggregation import (
+            build_model_grid,
+        )
+
         counts_artifact = _artifact(
             stages["counts"].outputs, "whale.sightings.ecotype_counts"
         )
@@ -820,6 +835,10 @@ def run_sightings_pipeline(
             )
         )
     if profile.include_intensity:
+        from marine_mammal_toolkit.tools.observations.post_process.aggregation import (
+            build_intensity,
+        )
+
         grid = _artifact(
             stages["model_grid"].outputs, "whale.sightings.reported_sighting_grid"
         )
@@ -849,8 +868,7 @@ def run_sightings_pipeline(
         stage_manifests.append(model_manifest)
     release_manifest = promote_sightings_release(
         release_root=(
-            request.data_root.resolve()
-            / "processed/domain/whale_layer/sightings/releases"
+            request.data_root.resolve() / "processed/sightings/final/releases"
         ),
         profile=profile,
         end_date=request.end_date,

@@ -13,6 +13,17 @@ from marine_mammal_toolkit.cetaceans.killer_whales.catalog import (
 )
 
 
+def _require_extra(extra: str, modules: tuple[str, ...]) -> None:
+    from importlib.util import find_spec
+
+    missing = [name for name in modules if find_spec(name) is None]
+    if missing:
+        raise click.ClickException(
+            f"Missing optional dependencies: {', '.join(missing)}. "
+            f"Install marine-mammal-toolkit[{extra}] for this command."
+        )
+
+
 def _input_path(ctx, parameter, value):
     """Resolve input paths against the explicitly selected data workspace."""
     if value is None:
@@ -25,6 +36,16 @@ def _input_path(ctx, parameter, value):
     if not candidate.exists():
         raise click.BadParameter(f"Input does not exist: {candidate}", param=parameter)
     return str(candidate.resolve())
+
+
+def _optional_twm_path(ctx, parameter, value):
+    if isinstance(value, tuple):
+        return tuple(_optional_twm_path(ctx, parameter, item) for item in value)
+    return str(
+        (
+            Path(ctx.find_root().obj["workspace_root"]) / Path(value).expanduser()
+        ).resolve()
+    )
 
 
 @click.group()
@@ -62,14 +83,150 @@ def observations():
     """Collect, process, impute, and post-process sightings."""
 
 
+@observations.command("sources")
+def list_observation_sources():
+    """List providers, query capabilities, and configured GBIF datasets."""
+    from .cetaceans.killer_whales.query import SOURCE_CATALOG
+    from .cetaceans.killer_whales.configuration import load_sightings_config
+
+    _, settings = load_sightings_config(config_path())
+    click.echo(
+        json.dumps(
+            {
+                "sources": SOURCE_CATALOG,
+                "gbif_datasets": [
+                    item.model_dump()
+                    for item in settings.collection.sources["gbif"].dataset_allowlist
+                ],
+            },
+            indent=2,
+        )
+    )
+
+
+@observations.command("preflight")
+@click.option("--config", default=lambda: str(config_path()), callback=_input_path)
+@click.option("--profile", default="observations-only")
+@click.pass_context
+def preflight_observations_cli(ctx, config, profile):
+    """Check local inputs and configuration without network access or writes."""
+    from .cetaceans.killer_whales.query import preflight_observations
+
+    try:
+        result = preflight_observations(
+            config,
+            workspace_root=ctx.find_root().obj["workspace_root"],
+            data_root=ctx.find_root().obj["data_root"],
+            profile=profile,
+        )
+    except (ValueError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(json.dumps(result, indent=2))
+    if not result["ready"]:
+        raise click.ClickException("Preflight found missing prerequisites")
+
+
+@observations.command("query")
+@click.option(
+    "--source",
+    "sources",
+    multiple=True,
+    type=click.Choice(["twm", "acartia", "maplify", "inaturalist", "cwr", "gbif"]),
+    help="Repeat to combine providers; default: inaturalist.",
+)
+@click.option(
+    "--dataset",
+    "dataset_keys",
+    multiple=True,
+    help="GBIF dataset UUID; repeat to combine datasets.",
+)
+@click.option("--start", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
+@click.option("--end", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
+@click.option(
+    "--bbox",
+    nargs=4,
+    type=float,
+    default=(-180, 32, -109, 72),
+    show_default=True,
+    help="West south east north; default North Pacific observation extent.",
+)
+@click.option(
+    "--twm-file",
+    multiple=True,
+    type=click.Path(dir_okay=False),
+    help="Missing local TWM files warn and continue.",
+)
+@click.option("--config", callback=_input_path, type=click.Path(dir_okay=False))
+@click.option(
+    "--offline", is_flag=True, help="Replay this exact query's local source snapshots."
+)
+@click.option("--dry-run", is_flag=True)
+@click.pass_context
+def query_observations_cli(
+    ctx, sources, dataset_keys, start, end, bbox, twm_file, config, offline, dry_run
+):
+    """Query canonical observations without fitting models or building counts."""
+    from .cetaceans.killer_whales.query import query_configuration, query_observations
+
+    roots = ctx.find_root().obj
+    arguments = dict(
+        workspace_root=roots["workspace_root"],
+        start=start.date(),
+        end=end.date(),
+        sources=sources or ("inaturalist",),
+        dataset_keys=dataset_keys,
+        bbox=bbox,
+        twm_files=twm_file,
+        config=config,
+    )
+    try:
+        if dry_run:
+            payload = query_configuration(**arguments)
+            click.echo(
+                json.dumps(
+                    {
+                        "operation": "observations.query",
+                        "sources": list(payload["collection"]["sources"]),
+                        "start": payload["min_date"],
+                        "end": payload["max_date"],
+                        "bbox": payload["full_area"],
+                        "network_checked": False,
+                    },
+                    indent=2,
+                )
+            )
+            return
+        result = query_observations(
+            **arguments, data_root=roots["data_root"], offline=offline
+        )
+    except (ValueError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(json.dumps(result.to_dict(), indent=2))
+
+
+@observations.command("demo")
+@click.pass_context
+def observation_demo(ctx):
+    """Run an offline synthetic example through the production query API."""
+    from .cetaceans.killer_whales.query import run_demo
+
+    try:
+        result = run_demo(ctx.find_root().obj["workspace_root"])
+    except (ValueError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(json.dumps({"synthetic": True, **result.to_dict()}, indent=2))
+
+
 @observations.group()
 def impute():
     """Fit or apply a certified selective imputation model."""
+    _require_extra("imputation", ("seascape", "sklearn", "joblib"))
 
 
 @observations.group("post-process")
 def post_process():
     """Build counts, model grids, intensity, or all three sequentially."""
+    _require_extra("imputation", ("geopandas", "seascape"))
 
 
 @killer_whales.group()
@@ -302,7 +459,9 @@ def _show_sightings_plan(
             for name, universe in settings.model_universes.items()
         )
     )
-    click.echo(f"sources: {', '.join(settings.collection.sources)}")
+    click.echo(
+        f"sources: {', '.join(name for name, source in settings.collection.sources.items() if source.enabled)}"
+    )
     click.echo(f"h3_resolutions: {settings.h3_resolutions}")
     click.echo(f"frequencies: {settings.frequencies}")
     click.echo(
@@ -326,6 +485,7 @@ def _show_sightings_plan(
     "--profile",
     type=click.Choice(
         [
+            "observations-only",
             "production-retrospective",
             "imputation-only",
             "authoritative-counts",
@@ -346,7 +506,10 @@ def _show_sightings_plan(
     callback=_input_path,
 )
 @click.option(
-    "--twm-file", multiple=True, type=click.Path(dir_okay=False), callback=_input_path
+    "--twm-file",
+    multiple=True,
+    type=click.Path(dir_okay=False),
+    callback=_optional_twm_path,
 )
 @click.option(
     "--offline", is_flag=True, help="Replay the latest complete collected cohort."
@@ -394,6 +557,8 @@ def run_sightings_release(
     start = start_date.date() if start_date else date.fromisoformat(settings.min_date)
     selected_profile = release_profile(profile)
     if dry_run:
+        from .cetaceans.killer_whales.query import preflight_observations
+
         estimate = estimate_sightings_build(
             data_root=Path(roots["data_root"]),
             profile=selected_profile,
@@ -403,12 +568,18 @@ def run_sightings_release(
         estimate.update(
             {
                 "operation": "killer-whales.observations.run",
+                "preflight": preflight_observations(
+                    config,
+                    workspace_root=roots["workspace_root"],
+                    data_root=roots["data_root"],
+                    profile=profile,
+                ),
                 "config": str(document.source),
                 "config_hash": document.config_hash,
                 "offline": offline,
                 "release_pointer": str(
                     Path(roots["data_root"])
-                    / "processed/domain/whale_layer/sightings/releases/latest.json"
+                    / "processed/sightings/final/releases/latest.json"
                 ),
             }
         )
@@ -439,11 +610,319 @@ def run_sightings_release(
     click.echo(result.release_manifest)
 
 
+@observations.command("product")
+@click.option(
+    "--prune",
+    is_flag=True,
+    help="Opt in to guarded removal of older unpinned generations.",
+)
+@click.option(
+    "--keep-generations", default=3, show_default=True, type=click.IntRange(min=1)
+)
+@click.option(
+    "--pin-release",
+    multiple=True,
+    help="Release ID to protect during pruning; may be repeated.",
+)
+@click.option("--start-date", type=click.DateTime(formats=["%Y-%m-%d"]))
+@click.option("--end-date", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
+@click.option(
+    "--config",
+    type=click.Path(dir_okay=False),
+    callback=_input_path,
+    help=(
+        "Optional sightings YAML. Omit it to use the packaged product " "configuration."
+    ),
+)
+@click.option(
+    "--full-refresh",
+    is_flag=True,
+    help="Ignore source watermarks and recollect the configured history.",
+)
+@click.option("--resume", is_flag=True)
+@click.option("--force", is_flag=True)
+@click.option(
+    "--max-growth-fraction",
+    default=0.10,
+    show_default=True,
+    type=click.FloatRange(min=0.0),
+    help=(
+        "Retain prior product artifacts when the new sighting-count increase "
+        "exceeds this fraction."
+    ),
+)
+@click.option("--dry-run", is_flag=True)
+@click.pass_context
+def build_sightings_product(
+    ctx: click.Context,
+    start_date: Any,
+    end_date: Any,
+    config: str | None,
+    full_refresh: bool,
+    resume: bool,
+    force: bool,
+    max_growth_fraction: float,
+    dry_run: bool,
+    prune: bool,
+    keep_generations: int,
+    pin_release: tuple[str, ...],
+) -> None:
+    """Collect, impute, and publish the daily killer-whale sightings product."""
+    _require_extra("imputation,report", ("seascape", "sklearn", "plotly"))
+
+    from marine_mammal_toolkit.cetaceans.killer_whales.configuration import (
+        load_sightings_config,
+    )
+    from marine_mammal_toolkit.cetaceans.killer_whales.observations.product import (
+        cleanup_completed_sightings_run,
+    )
+    from marine_mammal_toolkit.cetaceans.killer_whales.observations.product import (
+        current_sightings_row_count,
+    )
+    from marine_mammal_toolkit.cetaceans.killer_whales.observations.product import (
+        materialize_sightings_product,
+    )
+    from marine_mammal_toolkit.cetaceans.killer_whales.observations.product import (
+        prune_prior_sightings_artifacts,
+    )
+    from marine_mammal_toolkit.cetaceans.killer_whales.observations.product import (
+        sightings_product_layout,
+    )
+    from marine_mammal_toolkit.cetaceans.killer_whales.pipeline import (
+        SightingsPipelineRunRequest,
+    )
+    from marine_mammal_toolkit.cetaceans.killer_whales.pipeline import (
+        SightingsReleaseBlocked,
+    )
+    from marine_mammal_toolkit.cetaceans.killer_whales.pipeline import (
+        run_sightings_pipeline,
+    )
+
+    if pin_release and not prune:
+        raise click.UsageError(
+            "--pin-release requires --prune; existing saved pins are always preserved"
+        )
+    roots = ctx.find_root().obj
+    layout = sightings_product_layout(roots["data_root"])
+    product_root = layout.product_root
+    selected_config = config or str(config_path("sightings_product"))
+    try:
+        document, settings = load_sightings_config(selected_config)
+    except (OSError, ValueError) as exc:
+        raise click.ClickException(f"Invalid sightings configuration: {exc}") from exc
+    start = start_date.date() if start_date else date.fromisoformat(settings.min_date)
+    end = end_date.date()
+    previous_row_count = current_sightings_row_count(product_root)
+    if dry_run:
+        from .cetaceans.killer_whales.query import preflight_observations
+
+        click.echo(
+            json.dumps(
+                {
+                    "operation": "killer-whales.observations.product",
+                    "preflight": preflight_observations(
+                        selected_config,
+                        workspace_root=roots["workspace_root"],
+                        data_root=product_root,
+                        profile="imputation-only",
+                    ),
+                    "mode": "full-refresh" if full_refresh else "incremental-update",
+                    "config": str(document.source),
+                    "config_hash": document.config_hash,
+                    "start_date": start.isoformat(),
+                    "end_date": end.isoformat(),
+                    "product_root": str(product_root),
+                    "raw_root": str(layout.raw_root),
+                    "processed_root": str(layout.sightings_root),
+                    "normalized_root": str(layout.normalized_root),
+                    "imputed_root": str(layout.imputed_root),
+                    "final_root": str(layout.final_root),
+                    "artifact_root": str(layout.imputed_root),
+                    "output_root": str(layout.imputed_root),
+                    "composite": str(layout.final_root / "composite-sightings.parquet"),
+                    "imputed": str(layout.final_root / "imputed-sightings.parquet"),
+                    "model_manifest": str(
+                        layout.final_root / "imputation-model-manifest.json"
+                    ),
+                    "report": str(layout.final_root / "sightings-report.html"),
+                    "previous_row_count": previous_row_count,
+                    "max_growth_fraction": max_growth_fraction,
+                    "prune": prune,
+                    "keep_generations": keep_generations,
+                    "pinned_release_ids": pin_release,
+                    "temporal_grain": "daily",
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    from marine_mammal_toolkit.tools._core.locking import workspace_write_lock
+
+    ctx.with_resource(workspace_write_lock(product_root))
+    layout.prepare()
+    try:
+        result = run_sightings_pipeline(
+            SightingsPipelineRunRequest(
+                config=Path(selected_config),
+                data_root=product_root,
+                artifact_root=layout.imputed_root,
+                output_root=layout.imputed_root,
+                start_date=start_date.date() if start_date else None,
+                end_date=end,
+                profile="imputation-only",
+                run_id=roots["run_id"],
+                persistent_state=True,
+                full_refresh=full_refresh,
+                force=force,
+                resume=resume,
+            )
+        )
+    except SightingsReleaseBlocked as exc:
+        raise click.ClickException(
+            f"{exc}. Product run report: {exc.candidate_report}. "
+            "The prior product aliases were not changed."
+        ) from exc
+    product = materialize_sightings_product(
+        result.release_manifest,
+        product_root=product_root,
+    )
+    retention = (
+        prune_prior_sightings_artifacts(
+            product_root=product_root,
+            previous_row_count=previous_row_count,
+            max_growth_fraction=max_growth_fraction,
+            keep_generations=keep_generations,
+            pinned_release_ids=pin_release,
+        ).as_dict(product_root=product_root)
+        if prune
+        else {"applied": False, "reason": "pruning_not_requested", "removed_paths": []}
+    )
+    cleanup_completed_sightings_run(
+        product_root=product_root,
+        completed_run_id=result.candidate_root.name,
+    )
+    click.echo(
+        json.dumps(
+            {
+                "release_manifest": str(product.release_manifest),
+                "dated_root": str(product.dated_root),
+                "composite": str(product.composite_path),
+                "imputed": str(product.imputed_path),
+                "model_manifest": str(product.model_manifest_path),
+                "report": str(product.report_path),
+                "retention": retention,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
+@observations.command("report")
+@click.option("--composite", type=click.Path(dir_okay=False, path_type=Path))
+@click.option("--imputed", type=click.Path(dir_okay=False, path_type=Path))
+@click.option("--model-manifest", type=click.Path(dir_okay=False, path_type=Path))
+@click.option("--output", type=click.Path(dir_okay=False, path_type=Path))
+@click.option(
+    "--h3-resolution", default=6, show_default=True, type=click.IntRange(0, 15)
+)
+@click.option("--force", is_flag=True, help="Replace an existing HTML report.")
+@click.option("--dry-run", is_flag=True)
+@click.pass_context
+def build_sightings_report(
+    ctx: click.Context,
+    composite: Path | None,
+    imputed: Path | None,
+    model_manifest: Path | None,
+    output: Path | None,
+    h3_resolution: int,
+    force: bool,
+    dry_run: bool,
+) -> None:
+    """Build the all-time sightings density map and daily count report."""
+    _require_extra("report", ("plotly",))
+
+    from marine_mammal_toolkit.cetaceans.killer_whales.observations.report import (
+        build_sightings_report_html,
+    )
+
+    roots = ctx.find_root().obj
+    workspace_root = Path(roots["workspace_root"])
+    processed = Path(roots["data_root"]) / "processed/sightings/final"
+
+    def resolve(value: Path | None, default: Path) -> Path:
+        selected = value or default
+        return (
+            selected.expanduser().resolve()
+            if selected.is_absolute()
+            else (workspace_root / selected).resolve()
+        )
+
+    composite_path = resolve(composite, processed / "composite-sightings.parquet")
+    imputed_path = resolve(imputed, processed / "imputed-sightings.parquet")
+    manifest_path = resolve(
+        model_manifest, processed / "imputation-model-manifest.json"
+    )
+    output_path = resolve(output, processed / "sightings-report.html")
+    uses_product_defaults = all(
+        value is None for value in (composite, imputed, model_manifest, output)
+    )
+    if uses_product_defaults and (processed / "latest.json").is_file():
+        from .cetaceans.killer_whales.observations.product import (
+            resolve_sightings_product,
+        )
+        from .tools._core.locking import workspace_write_lock
+        from uuid import uuid4
+
+        if not dry_run:
+            ctx.with_resource(workspace_write_lock(roots["data_root"]))
+        current = resolve_sightings_product(roots["data_root"], verify_report=False)
+        composite_path = current.composite_path
+        imputed_path = current.imputed_path
+        manifest_path = current.model_manifest_path
+        output_path = processed / "reports" / f"{uuid4().hex}.html"
+    plan = {
+        "operation": "killer-whales.observations.report",
+        "composite": str(composite_path),
+        "imputed": str(imputed_path),
+        "model_manifest": str(manifest_path),
+        "output": str(output_path),
+        "h3_resolution": h3_resolution,
+    }
+    if dry_run:
+        click.echo(json.dumps(plan, indent=2, sort_keys=True))
+        return
+    try:
+        report_path = build_sightings_report_html(
+            composite_path=composite_path,
+            imputed_path=imputed_path,
+            model_manifest_path=manifest_path,
+            output_path=output_path,
+            h3_resolution=h3_resolution,
+            overwrite=force,
+        )
+        if uses_product_defaults:
+            from marine_mammal_toolkit.cetaceans.killer_whales.observations.product import (
+                record_sightings_report,
+            )
+
+            record_sightings_report(
+                product_root=Path(roots["data_root"]), report_path=report_path
+            )
+    except (FileNotFoundError, ValueError, FileExistsError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(report_path)
+
+
 @observations.command("collect")
 @click.option("--start", "start_date", type=click.DateTime(formats=["%Y-%m-%d"]))
 @click.option("--end", "end_date", type=click.DateTime(formats=["%Y-%m-%d"]))
 @click.option(
-    "--twm-file", multiple=True, type=click.Path(dir_okay=False), callback=_input_path
+    "--twm-file",
+    multiple=True,
+    type=click.Path(dir_okay=False),
+    callback=_optional_twm_path,
 )
 @click.option(
     "--offline", is_flag=True, help="Use the latest immutable local source snapshot."
@@ -662,7 +1141,7 @@ def data_validate(
             if manifest
             else (
                 Path(roots["data_root"])
-                / "processed/domain/whale_layer/sightings/releases/latest.json"
+                / "processed/sightings/final/releases/latest.json"
             )
         )
         report = validate_sightings_release(

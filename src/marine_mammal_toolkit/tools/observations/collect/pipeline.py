@@ -156,10 +156,22 @@ def _range_snapshot_mode(
     # is an authoritative replacement feed.
     if previous_snapshot is not None:
         return "DELTA_UPSERT"
-    source_min = date.fromisoformat(
-        config.collection.sources[source].min_date or config.min_date  # type: ignore[index]
-    )
-    return "FULL_REPLACE" if start <= source_min else "DELTA_UPSERT"
+    # A first bounded query is a complete initial state for its requested scope,
+    # not a claim that all historical observations have been acquired.
+    return "FULL_REPLACE"
+
+
+def collection_scope(config, source_name, start_date=None) -> str:
+    """Identity of a source selection; the moving end watermark is excluded."""
+    source = config.collection.sources[source_name]
+    payload = {
+        "source": source.model_dump(mode="json", exclude={"enabled"}),
+        "full_area": config.full_area.model_dump(),
+        "start": str(start_date or source.min_date or config.min_date),
+    }
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
 
 
 def _assert_monotonic_watermark(
@@ -323,6 +335,7 @@ def collect_sightings(request: SightingsCollectionRequest) -> StageResult:
     outputs: list[ArtifactRef] = []
     source_latest_payloads: dict[str, dict[str, str]] = {}
     snapshot_errors: list[str] = []
+    unavailable_sources: list[str] = []
 
     for source_name in ("twm", "acartia", "maplify", "inaturalist", "cwr", "gbif"):
         settings = config.collection.sources[source_name]
@@ -339,7 +352,26 @@ def collect_sightings(request: SightingsCollectionRequest) -> StageResult:
                 previous_snapshot = _latest_snapshot(snapshots_root)
             except FileNotFoundError:
                 pass
-        if request.offline:
+        scope = collection_scope(config, source_name, request.start_date)
+        if previous_snapshot is not None:
+            previous_metadata = json.loads(
+                (previous_snapshot / "snapshot.json").read_text()
+            )
+            if previous_metadata.get("collection_scope") != scope:
+                if (
+                    request.offline
+                    and previous_metadata.get("collection_scope") is not None
+                ):
+                    raise ValueError(
+                        f"Offline {source_name} snapshot has a different query scope; collect the selected scope first"
+                    )
+                if not request.offline:
+                    LOGGER.info(
+                        "Collection scope changed for %s; collecting a new initial snapshot",
+                        source_name,
+                    )
+                    previous_snapshot = None
+        if request.offline and (previous_snapshot is not None or source_name != "twm"):
             if previous_snapshot is None:
                 raise FileNotFoundError(
                     f"No published immutable snapshot available for offline source {source_name}"
@@ -361,21 +393,41 @@ def collect_sightings(request: SightingsCollectionRequest) -> StageResult:
                     else None
                 )
                 files = request.twm_files or (
-                    tuple(sorted(configured.glob("*.csv")))
+                    tuple(
+                        sorted(
+                            path for path in configured.glob("*.csv") if path.is_file()
+                        )
+                    )
                     if configured and configured.exists()
                     else ()
                 )
+                files = tuple(path for path in files if path.is_file())
                 if not files:
-                    raise FileNotFoundError(
-                        "TWM collection requires at least one local CSV"
+                    LOGGER.warning(
+                        "TWM input is unavailable: no local CSV files found at %s. Continuing with other sources; TWM coverage is unknown.",
+                        configured or "the supplied paths",
+                    )
+                    unavailable_sources.append(source_name)
+                    source_metrics["availability"] = "source_unavailable"
+                    atomic_write_json(
+                        snapshot / "unavailable.json",
+                        {
+                            "source": "twm",
+                            "status": "source_unavailable",
+                            "reason": "no_local_csv_files",
+                            "path": str(configured) if configured else None,
+                        },
                     )
                 from .sources.twm import collect_twm_files
 
-                collect_twm_files(files, snapshot)
+                if files:
+                    collect_twm_files(files, snapshot)
                 snapshot_mode = (
-                    "DELTA_UPSERT" if previous_snapshot is not None else "FULL_REPLACE"
+                    "DELTA_UPSERT"
+                    if files and previous_snapshot is not None
+                    else "FULL_REPLACE"
                 )
-                watermark = end.isoformat()
+                watermark = end.isoformat() if files else None
                 request_parameters = {"files": [str(path) for path in files]}
             elif source_name == "acartia":
                 rows = _fetch_acartia(config)
@@ -430,8 +482,10 @@ def collect_sightings(request: SightingsCollectionRequest) -> StageResult:
                     "bbox": bbox.tuple(),
                 }
             elif source_name == "gbif":
-                start = request.start_date or date.fromisoformat(
-                    settings.min_date or config.min_date
+                start = request.start_date or (
+                    date.fromisoformat(settings.min_date or config.min_date)
+                    if request.full_refresh
+                    else _default_start(previous_snapshot, config, source_name, end)
                 )
                 rows, dataset_metadata = _fetch_gbif(config, start, end)
                 (snapshot / "payload.json").write_text(json.dumps(rows, default=str))
@@ -577,7 +631,10 @@ def collect_sightings(request: SightingsCollectionRequest) -> StageResult:
                 settings.verified_coverage_start,
                 settings.verified_coverage_through,
             )
-            if all(configured_verified):
+            if source_metrics.get("availability") == "source_unavailable":
+                coverage_start = coverage_through = None
+                coverage_status = "source_unavailable"
+            elif all(configured_verified):
                 coverage_start, coverage_through = configured_verified
                 coverage_status = "configured_verified"
             elif source_name in {"maplify", "inaturalist", "gbif"}:
@@ -600,6 +657,7 @@ def collect_sightings(request: SightingsCollectionRequest) -> StageResult:
             adapted_semantic_hash = semantic_content_sha256
             metadata = {
                 "source": source_name,
+                "collection_scope": scope,
                 "snapshot_mode": snapshot_mode,
                 "retrieval_id": retrieval_id,
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
@@ -640,6 +698,15 @@ def collect_sightings(request: SightingsCollectionRequest) -> StageResult:
                 "cohort_retrieval_id": retrieval_id,
             }
         snapshot_metadata = json.loads((snapshot / "snapshot.json").read_text())
+        if (
+            snapshot_metadata.get("availability") == "source_unavailable"
+            and source_name not in unavailable_sources
+        ):
+            unavailable_sources.append(source_name)
+            LOGGER.warning(
+                "%s snapshot records unavailable input; coverage remains unknown",
+                source_name,
+            )
         snapshot_errors.extend(
             _snapshot_validation_errors(
                 snapshot,
@@ -691,9 +758,14 @@ def collect_sightings(request: SightingsCollectionRequest) -> StageResult:
         valid=not snapshot_errors,
         dataset_id="whale.sightings.sources",
         errors=tuple(snapshot_errors),
+        warnings=tuple(
+            f"{name}: source_unavailable; coverage is unknown"
+            for name in unavailable_sources
+        ),
         metrics={
             "source_count": len(outputs),
             "enabled_sources": sorted(enabled_sources),
+            "unavailable_sources": sorted(unavailable_sources),
         },
     )
     report.require_valid()
@@ -727,6 +799,7 @@ def collect_sightings(request: SightingsCollectionRequest) -> StageResult:
                 "semantic_version": "9",
                 "signature": signature_payload,
                 "source_count": len(outputs),
+                "unavailable_sources": sorted(unavailable_sources),
             },
         ),
     )

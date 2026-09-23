@@ -47,7 +47,7 @@ from marine_mammal_toolkit.tools.observations.runtime import code_revision
 from marine_mammal_toolkit.tools.observations.runtime import resume_result
 from marine_mammal_toolkit.tools.observations.runtime import stage_signature
 
-NORMALIZATION_VERSION = "9"
+NORMALIZATION_VERSION = "10"
 LOGGER = logging.getLogger(__name__)
 SourceKey = Literal["twm", "acartia", "maplify", "inaturalist", "cwr", "gbif"]
 SOURCE_KEYS: dict[str, SourceKey] = {
@@ -427,7 +427,10 @@ def _normalize_records(
                 )
             )
             continue
-        if temporal["SIGHTING_DATE"] < min_date:
+        if temporal["SIGHTING_DATE"] < min_date or (
+            config.max_date is not None
+            and temporal["SIGHTING_DATE"] > date.fromisoformat(config.max_date)
+        ):
             audit.append(
                 _audit(
                     str(row["SOURCE_RECORD_ID"]),
@@ -1045,7 +1048,7 @@ def _assemble_source_state(
         )
         phase_started = finished
 
-    history_path = processed_root / "_state/source_history.parquet"
+    history_path = processed_root / "state/source_history.parquet"
 
     latest_pointer = processed_root / "manifests/normalize/latest.json"
     snapshots_already_applied = False
@@ -1068,7 +1071,6 @@ def _assemble_source_state(
                 for source, snapshot in snapshots.items()
             }
             compatible_workflows = {
-                "whale.sightings.normalize.v8",
                 f"whale.sightings.normalize.v{NORMALIZATION_VERSION}",
             }
             version_matches = expected_config_hash is None or (
@@ -1088,7 +1090,7 @@ def _assemble_source_state(
         history_index = pl.read_parquet(
             [str(item) for item in history_files], columns=["SOURCE_RECORD_ID"]
         )
-        prior_state_path = processed_root / "_state/source_current.parquet"
+        prior_state_path = processed_root / "state/source_current.parquet"
         prior_state = pl.read_parquet(prior_state_path)
         audit_path = processed_root / "audit.parquet"
         updates = (
@@ -1141,7 +1143,7 @@ def _assemble_source_state(
         if history_files
         else empty_history.select(history_index_columns)
     )
-    prior_state_path = processed_root / "_state/source_current.parquet"
+    prior_state_path = processed_root / "state/source_current.parquet"
     prior_state = (
         pl.read_parquet(prior_state_path) if prior_state_path.exists() else empty_state
     )
@@ -1301,14 +1303,22 @@ def _assemble_source_state(
     )
     log_phase("derive_correction_state")
     current_parts: list[pl.DataFrame] = []
-    source_names = sorted(
-        set(prior_state.get_column("SOURCE").drop_nulls().to_list())
-        | set(incoming.get_column("SOURCE").drop_nulls().to_list())
-    )
+    # Active state contains only the selected cohort. Historical rows remain in
+    # source_history and immutable snapshots, never leak into a new selection.
+    source_metadata = {
+        source.upper(): json.loads((path / "snapshot.json").read_text())
+        for source, path in snapshots.items()
+    }
+    source_names = sorted(source_metadata)
     for source in source_names:
         incoming_source = incoming.filter(pl.col("SOURCE") == source)
+        metadata = source_metadata[source]
         if incoming_source.is_empty():
-            current_parts.append(prior_state.filter(pl.col("SOURCE") == source))
+            if (
+                str(metadata.get("snapshot_mode", "FULL_REPLACE")).upper()
+                == "DELTA_UPSERT"
+            ):
+                current_parts.append(prior_state.filter(pl.col("SOURCE") == source))
             continue
         latest_retrieval = incoming_source.sort(["RETRIEVED_AT", "RETRIEVAL_ID"]).row(
             -1, named=True
@@ -1316,7 +1326,7 @@ def _assemble_source_state(
         mode = str(latest_retrieval["SNAPSHOT_MODE"])
         latest_id = str(latest_retrieval["RETRIEVAL_ID"])
         prior_source = prior_state.filter(pl.col("SOURCE") == source)
-        if mode == "DELTA_UPSERT" and prior_source.is_empty():
+        if mode == "DELTA_UPSERT" and not prior_state_path.exists():
             raise ValueError(
                 f"Cannot initialize {source} state from DELTA_UPSERT snapshot; run a full refresh"
             )
@@ -1446,7 +1456,11 @@ def _assemble_source_state(
     }
     log_phase("finalize_frames")
     return (
-        history_delta if not history_delta.is_empty() else prior_history,
+        (
+            history_delta
+            if not history_delta.is_empty()
+            else prior_history if history_files else empty_history
+        ),
         current,
         updates,
         state_changed,
@@ -1590,17 +1604,17 @@ def normalize_sightings(request: NormalizationRequest) -> StageResult:
         phase_started = finished
 
     document, config = load_sightings_config(request.config)
-    processed_root = request.data_root / "processed/domain/whale_layer/sightings"
+    processed_root = request.data_root / "processed/sightings/normalized"
     state_paths = [
-        processed_root / "_state/source_history.parquet",
-        processed_root / "_state/source_current.parquet",
-        processed_root / "_state/identity/assignments.parquet",
-        processed_root / "_state/identity/aliases.parquet",
-        processed_root / "_state/identity/lineage.parquet",
+        processed_root / "state/source_history.parquet",
+        processed_root / "state/source_current.parquet",
+        processed_root / "state/identity/assignments.parquet",
+        processed_root / "state/identity/aliases.parquet",
+        processed_root / "state/identity/lineage.parquet",
     ]
     signature, signature_payload = stage_signature(
         stage="whale.sightings.normalize",
-        semantic_version="9",
+        semantic_version="10",
         config_hash=document.config_hash,
         inputs=request.inputs,
         parameters={
@@ -1658,9 +1672,9 @@ def normalize_sightings(request: NormalizationRequest) -> StageResult:
     log_stage_phase("cluster")
     observation_ids, identity_table, alias_table, lineage_table = _resolve_identities(
         groups,
-        processed_root / "_state/identity/assignments.parquet",
-        processed_root / "_state/identity/aliases.parquet",
-        processed_root / "_state/identity/lineage.parquet",
+        processed_root / "state/identity/assignments.parquet",
+        processed_root / "state/identity/aliases.parquet",
+        processed_root / "state/identity/lineage.parquet",
         request.run_id,
         policy=config.observation_policy,
     )
@@ -1716,7 +1730,7 @@ def normalize_sightings(request: NormalizationRequest) -> StageResult:
                 table,
                 spec,
                 run_id=request.run_id,
-                producer="whale.sightings.normalize.v9",
+                producer="whale.sightings.normalize.v10",
                 config_hash=document.config_hash,
                 row_count=state_row_counts[dataset_id],
                 inputs=request.inputs,
@@ -1739,7 +1753,7 @@ def normalize_sightings(request: NormalizationRequest) -> StageResult:
             artifact, report = store.reference_existing(
                 spec,
                 run_id=request.run_id,
-                producer="whale.sightings.normalize.v9",
+                producer="whale.sightings.normalize.v10",
                 config_hash=document.config_hash,
                 row_count=state_row_counts[dataset_id],
                 inputs=request.inputs,
@@ -1751,7 +1765,7 @@ def normalize_sightings(request: NormalizationRequest) -> StageResult:
                 table,
                 spec,
                 run_id=request.run_id,
-                producer="whale.sightings.normalize.v9",
+                producer="whale.sightings.normalize.v10",
                 config_hash=document.config_hash,
                 inputs=request.inputs,
                 data_snapshot=data_snapshot,
@@ -1768,7 +1782,7 @@ def normalize_sightings(request: NormalizationRequest) -> StageResult:
     conflict_count = sum(item["REASON"] == "DATE_TIMESTAMP_CONFLICT" for item in audit)
     manifest = RunManifest(
         run_id=request.run_id,
-        workflow="whale.sightings.normalize.v9",
+        workflow="whale.sightings.normalize.v10",
         config_hash=document.config_hash,
         resolved_config=document.redacted_data(),
         inputs=request.inputs,

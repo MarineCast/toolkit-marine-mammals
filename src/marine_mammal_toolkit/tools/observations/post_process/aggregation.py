@@ -362,7 +362,7 @@ def build_model_grid(request: ModelGridRequest) -> StageResult:
     )
     manifest_path = (
         request.data_root
-        / f"processed/domain/whale_layer/sightings/manifests/model_grid/{signature}.json"
+        / f"processed/sightings/final/manifests/model_grid/{signature}.json"
     )
     resumed = resume_result(
         enabled=request.resume,
@@ -436,7 +436,7 @@ def build_model_grid(request: ModelGridRequest) -> StageResult:
                         )
     destination = (
         request.data_root
-        / f"processed/domain/whale_layer/sightings/dense/mode={request.mode.value}/reported_sighting"
+        / f"processed/sightings/final/dense/mode={request.mode.value}/reported_sighting"
     )
     if destination.exists() and not request.force:
         raise FileExistsError(f"Model grid exists; pass --force: {destination}")
@@ -551,8 +551,7 @@ def build_model_grid(request: ModelGridRequest) -> StageResult:
     )
     manifest.write(manifest_path, overwrite=request.force)
     latest_pointer = (
-        request.data_root
-        / "processed/domain/whale_layer/sightings/manifests/model_grid/latest.json"
+        request.data_root / "processed/sightings/final/manifests/model_grid/latest.json"
     )
     atomic_write_json(
         latest_pointer,
@@ -855,7 +854,7 @@ def build_intensity(request: IntensityRequest) -> StageResult:
     )
     manifest_path = (
         request.data_root
-        / f"processed/domain/whale_layer/sightings/manifests/intensity/{signature}.json"
+        / f"processed/sightings/final/manifests/intensity/{signature}.json"
     )
     resumed = resume_result(
         enabled=request.resume,
@@ -868,11 +867,11 @@ def build_intensity(request: IntensityRequest) -> StageResult:
         return resumed
     destination = (
         request.data_root
-        / f"processed/domain/whale_layer/sightings/dense/mode={request.mode.value}/relative_reported_activity"
+        / f"processed/sightings/final/dense/mode={request.mode.value}/relative_reported_activity"
     )
     alias_destination = (
         request.data_root
-        / f"processed/domain/whale_layer/sightings/dense/mode={request.mode.value}/relative_intensity"
+        / f"processed/sightings/final/dense/mode={request.mode.value}/relative_intensity"
     )
     transaction_root = (
         request.data_root / ".staging" / request.run_id / "whale.sightings.intensity"
@@ -1060,8 +1059,7 @@ def build_intensity(request: IntensityRequest) -> StageResult:
     )
     manifest.write(manifest_path, overwrite=request.force)
     latest_pointer = (
-        request.data_root
-        / "processed/domain/whale_layer/sightings/manifests/intensity/latest.json"
+        request.data_root / "processed/sightings/final/manifests/intensity/latest.json"
     )
     atomic_write_json(
         latest_pointer,

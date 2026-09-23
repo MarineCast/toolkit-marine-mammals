@@ -9,6 +9,9 @@ from marine_mammal_toolkit.cetaceans.killer_whales.resources import config_path
 from marine_mammal_toolkit.cetaceans.killer_whales.observations.imputer import (
     KillerWhaleImputer,
 )
+from marine_mammal_toolkit.cetaceans.killer_whales.observations.release import (
+    release_profile,
+)
 from marine_mammal_toolkit.cetaceans.killer_whales.populations.prepare import (
     load_population_rows,
     build_population_payload,
@@ -55,6 +58,68 @@ def test_source_accepts_another_taxon_without_orca_defaults():
         == []
     )
     assert captured[0]["taxon_id"] == 123
+
+
+def test_repository_sightings_workspace_is_bounded_to_data_sightings():
+    repository = Path(__file__).resolve().parents[1]
+    document, config = load_sightings_config(
+        repository / "config/killer_whales/sightings.yaml",
+        workspace_root=repository,
+    )
+
+    assert config.collection.sources["twm"].enabled is True
+    assert {
+        name for name, source in config.collection.sources.items() if source.enabled
+    } == {"twm", "acartia", "maplify", "inaturalist", "cwr", "gbif"}
+    for configured_path in (
+        config.collection.sources["twm"].local_path,
+        config.collection.sources["acartia"].local_path,
+        config.imputation.inputs.observations,
+        config.imputation.inputs.associations,
+        config.imputation.artifacts.models_dir,
+        config.imputation.artifacts.output,
+        *(universe.polygon for universe in config.model_universes.values()),
+    ):
+        assert configured_path is not None
+        assert document.resolve_path(configured_path).is_relative_to(
+            repository / "data/sightings"
+        )
+
+
+def test_observations_only_profile_stops_before_derived_features():
+    profile = release_profile("observations-only")
+
+    assert profile.resolutions == ()
+    assert profile.frequencies == ()
+    assert profile.include_imputation is False
+    assert profile.include_counts is False
+    assert profile.include_model_grid is False
+    assert profile.include_intensity is False
+
+
+def test_product_config_is_packaged_and_targets_the_consumer_product_layout():
+    resource = config_path("sightings_product")
+    document, config = load_sightings_config(resource)
+
+    assert resource.is_file()
+    assert config.collection.sources["twm"].local_path == Path(
+        "data/marine-mammals/killer-whales/raw/source-inputs/twm"
+    )
+    assert config.imputation.artifacts.output == Path(
+        "data/processed/sightings/imputed/imputed-sightings.parquet"
+    )
+    assert config.imputation.inputs.water_network_config == Path(
+        "data/marine-mammals/killer-whales/raw/support/seascape/config/data/"
+        "product-project.yaml"
+    )
+    assert (
+        document.resolve_path(config.model_universes["SRKW"].polygon)
+        .as_posix()
+        .endswith(
+            "data/marine-mammals/killer-whales/raw/support/model-domains/"
+            "SRKW_MODEL_DOMAIN.parquet"
+        )
+    )
 
 
 def test_config_includes_use_declaring_directory_and_paths_use_workspace(tmp_path):

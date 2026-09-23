@@ -74,16 +74,16 @@ def register_builtin_datasets() -> None:
     for state_name, relative_path, primary_key in (
         (
             "source_record_history",
-            "_state/source_history.parquet",
+            "state/source_history.parquet",
             ("SOURCE_RECORD_ID", "RETRIEVAL_ID", "PAYLOAD_CHECKSUM"),
         ),
-        ("source_records", "_state/source_current.parquet", ("SOURCE_RECORD_ID",)),
+        ("source_records", "state/source_current.parquet", ("SOURCE_RECORD_ID",)),
     ):
         _register(
             f"whale.sightings.{state_name}",
             DatasetLayer.NORMALIZED,
             DatasetFormat.PARQUET,
-            f"{{data_root}}/processed/domain/whale_layer/sightings/{relative_path}",
+            f"{{data_root}}/processed/sightings/normalized/{relative_path}",
             "whale.sightings.normalize.v9",
             dependencies=(
                 "whale.sightings.source_twm",
@@ -113,21 +113,21 @@ def register_builtin_datasets() -> None:
         ("normalization_audit", "audit.parquet", ()),
         (
             "identity_resolution",
-            "_state/identity/assignments.parquet",
+            "state/identity/assignments.parquet",
             ("SOURCE_RECORD_ID",),
         ),
         (
             "identity_aliases",
-            "_state/identity/aliases.parquet",
+            "state/identity/aliases.parquet",
             ("ALIAS_OBSERVATION_ID",),
         ),
-        ("identity_lineage", "_state/identity/lineage.parquet", ()),
+        ("identity_lineage", "state/identity/lineage.parquet", ()),
     ):
         _register(
             f"whale.sightings.{name}",
             DatasetLayer.NORMALIZED,
             DatasetFormat.PARQUET,
-            f"{{data_root}}/processed/domain/whale_layer/sightings/{relative_path}",
+            f"{{data_root}}/processed/sightings/normalized/{relative_path}",
             "whale.sightings.normalize.v9",
             dependencies=("whale.sightings.source_records",),
             primary_key=primary_key,
@@ -139,7 +139,7 @@ def register_builtin_datasets() -> None:
             f"whale.sightings.imputed_{suffix}",
             DatasetLayer.DOMAIN,
             DatasetFormat.PARQUET,
-            f"{{data_root}}/processed/domain/whale_layer/sightings/imputed_{suffix}.parquet",
+            f"{{data_root}}/processed/sightings/imputed/imputed_{suffix}.parquet",
             "whale.sightings.impute",
             dependencies=(
                 "whale.sightings.observations",
@@ -180,7 +180,7 @@ def register_builtin_datasets() -> None:
             f"whale.sightings.{count_name}",
             DatasetLayer.DOMAIN,
             DatasetFormat.DIRECTORY,
-            f"{{data_root}}/processed/domain/whale_layer/sightings/counts/mode=retrospective/{count_name}",
+            f"{{data_root}}/processed/sightings/final/counts/mode=retrospective/{count_name}",
             "whale.sightings.counts.v7",
             dependencies=(
                 "whale.sightings.observations",
@@ -196,7 +196,7 @@ def register_builtin_datasets() -> None:
         "whale.sightings.reported_sighting_grid",
         DatasetLayer.DOMAIN,
         DatasetFormat.DIRECTORY,
-        "{data_root}/processed/domain/whale_layer/sightings/dense/mode=retrospective/reported_sighting",
+        "{data_root}/processed/sightings/final/dense/mode=retrospective/reported_sighting",
         "whale.sightings.model_grid.v7",
         dependencies=(
             "whale.sightings.ecotype_counts",
@@ -217,7 +217,7 @@ def register_builtin_datasets() -> None:
         "whale.sightings.relative_reported_activity",
         DatasetLayer.DOMAIN,
         DatasetFormat.DIRECTORY,
-        "{data_root}/processed/domain/whale_layer/sightings/dense/mode=retrospective/relative_reported_activity",
+        "{data_root}/processed/sightings/final/dense/mode=retrospective/relative_reported_activity",
         "whale.sightings.intensity.v8",
         dependencies=(
             "whale.sightings.reported_sighting_grid",
@@ -236,7 +236,7 @@ def register_builtin_datasets() -> None:
         "whale.sightings.relative_intensity",
         DatasetLayer.DOMAIN,
         DatasetFormat.DIRECTORY,
-        "{data_root}/processed/domain/whale_layer/sightings/dense/mode=retrospective/relative_intensity",
+        "{data_root}/processed/sightings/final/dense/mode=retrospective/relative_intensity",
         "whale.sightings.intensity.compatibility_alias.v8",
         dependencies=("whale.sightings.relative_reported_activity",),
         primary_key=(

@@ -27,6 +27,15 @@ class CollectionSettings(StrictConfig):
         SourceSettings,
     ]
 
+    @field_validator("sources")
+    @classmethod
+    def complete_source_selection(cls, value):
+        """Omitted providers are disabled, never silently enabled."""
+        return {
+            name: value.get(name, SourceSettings(enabled=False))
+            for name in ("twm", "acartia", "maplify", "inaturalist", "cwr", "gbif")
+        }
+
 
 class DeduplicationSettings(StrictConfig):
     timestamp_tolerance_minutes: int = Field(default=15, ge=0)
@@ -56,19 +65,17 @@ class ModelUniverseSettings(StrictConfig):
 
 class ImputationInputSettings(StrictConfig):
     observations: Path = Path(
-        "data/processed/domain/whale_layer/sightings/observations.parquet"
+        "data/processed/sightings/normalized/observations.parquet"
     )
     associations: Path | None = Path(
-        "data/processed/domain/whale_layer/sightings/associations.parquet"
+        "data/processed/sightings/normalized/associations.parquet"
     )
     water_network_config: Path = Path("config/data/environment_seascape.yaml")
 
 
 class ImputationArtifactSettings(StrictConfig):
     models_dir: Path = Path("models/sighting_imputation")
-    output: Path = Path(
-        "data/processed/domain/whale_layer/sightings/imputed_retrospective.parquet"
-    )
+    output: Path = Path("data/processed/sightings/imputed/imputed-sightings.parquet")
 
 
 class ImputationFeatureSettings(StrictConfig):
@@ -236,6 +243,7 @@ class SightingsPipelineConfig(StrictConfig):
     full_area: BBox
     model_universes: dict[Literal["SRKW", "TRANSIENT"], ModelUniverseSettings]
     min_date: str = "1980-01-01"
+    max_date: str | None = None
     water_network_config: Path = Path("config/data/environment_seascape.yaml")
     h3_resolutions: tuple[int, ...] = (4, 5, 6)
     frequencies: tuple[Literal["daily", "weekly"], ...] = ("daily", "weekly")
@@ -279,6 +287,10 @@ class SightingsPipelineConfig(StrictConfig):
 
     @model_validator(mode="after")
     def validate_sources_and_ranges(self) -> "SightingsPipelineConfig":
+        if self.max_date is not None and date.fromisoformat(
+            self.max_date
+        ) < date.fromisoformat(self.min_date):
+            raise ValueError("max_date cannot precede min_date")
         required_sources = {"twm", "acartia", "maplify", "inaturalist", "cwr", "gbif"}
         missing_sources = required_sources - set(self.collection.sources)
         if missing_sources:
@@ -341,8 +353,6 @@ class SightingsPipelineConfig(StrictConfig):
                     raise ValueError(
                         f"Enabled {name} source_license_terms_url must be HTTP(S)"
                     )
-            if name == "twm" and source.local_path is None:
-                raise ValueError("Enabled TWM source requires local_path")
             if (
                 name in {"acartia", "maplify", "inaturalist", "gbif"}
                 and source.url is None

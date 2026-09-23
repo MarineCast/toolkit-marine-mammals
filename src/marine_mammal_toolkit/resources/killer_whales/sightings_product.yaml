@@ -1,0 +1,25 @@
+# Consumer-facing killer-whale sightings product layout. Paths resolve against
+# the explicit application workspace; acquisition and imputation policy remain
+# inherited from the canonical toolkit configuration.
+extends: sightings.yaml
+
+model_universes:
+  SRKW:
+    polygon: data/marine-mammals/killer-whales/raw/support/model-domains/SRKW_MODEL_DOMAIN.parquet
+  TRANSIENT:
+    polygon: data/marine-mammals/killer-whales/raw/support/model-domains/TRANSIENT_MODEL_DOMAIN.parquet
+
+water_network_config: data/marine-mammals/killer-whales/raw/support/seascape/config/data/product-project.yaml
+
+collection:
+  sources:
+    twm:
+      local_path: data/marine-mammals/killer-whales/raw/source-inputs/twm
+    acartia:
+      local_path: data/marine-mammals/killer-whales/raw/source-inputs/acartia
+
+imputation:
+  inputs:
+    water_network_config: data/marine-mammals/killer-whales/raw/support/seascape/config/data/product-project.yaml
+  artifacts:
+    output: data/processed/sightings/imputed/imputed-sightings.parquet

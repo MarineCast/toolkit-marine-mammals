@@ -24,18 +24,18 @@ V3_PRODUCTS = (
 )
 
 STATE_LAYOUT_MOVES = {
-    "source_record_history.parquet": "_state/source_history.parquet",
-    "source_records.parquet": "_state/source_current.parquet",
+    "source_record_history.parquet": "state/source_history.parquet",
+    "source_records.parquet": "state/source_current.parquet",
     "normalization_audit.parquet": "audit.parquet",
-    "identity_resolution.parquet": "_state/identity/assignments.parquet",
-    "identity_aliases.parquet": "_state/identity/aliases.parquet",
-    "identity_lineage.parquet": "_state/identity/lineage.parquet",
+    "identity_resolution.parquet": "state/identity/assignments.parquet",
+    "identity_aliases.parquet": "state/identity/aliases.parquet",
+    "identity_lineage.parquet": "state/identity/lineage.parquet",
 }
 
 
 def migrate_state_layout(data_root: Path) -> tuple[Path, ...]:
     """Move existing sightings state into the canonical internal-state layout."""
-    root = data_root / "processed/domain/whale_layer/sightings"
+    root = data_root / "processed/sightings/normalized"
     moves: list[tuple[Path, Path]] = []
     for old_name, new_name in STATE_LAYOUT_MOVES.items():
         source = root / old_name
@@ -56,7 +56,7 @@ def migrate_state_layout(data_root: Path) -> tuple[Path, ...]:
 
 
 def archive_v3_products(data_root: Path, migration_run: str | None = None) -> Path:
-    source_root = data_root / "processed/domain/whale_layer/sightings"
+    source_root = data_root / "processed/sightings/normalized"
     run_id = migration_run or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     destination = source_root / "legacy/v3" / run_id
     if destination.exists():

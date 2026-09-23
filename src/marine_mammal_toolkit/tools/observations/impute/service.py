@@ -184,7 +184,7 @@ def impute_sightings(request: ImputationRequest) -> StageResult:
         },
     )
     manifest_path = request.data_root / (
-        f"processed/domain/whale_layer/sightings/manifests/impute/{request.mode.value}/{signature}.json"
+        f"processed/sightings/imputed/manifests/{request.mode.value}/{signature}.json"
     )
     resumed = resume_result(
         enabled=request.resume,
@@ -508,7 +508,7 @@ def impute_sightings(request: ImputationRequest) -> StageResult:
     manifest.write(manifest_path, overwrite=request.force)
     latest_pointer = (
         request.data_root
-        / f"processed/domain/whale_layer/sightings/manifests/impute/{request.mode.value}/latest.json"
+        / f"processed/sightings/imputed/manifests/{request.mode.value}/latest.json"
     )
     atomic_write_json(
         latest_pointer,

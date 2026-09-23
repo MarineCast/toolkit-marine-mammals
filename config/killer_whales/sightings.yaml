@@ -1,0 +1,31 @@
+# Checkout-local execution profile. The canonical scientific settings remain
+# packaged with the wheel; this file only supplies this repository's workspace
+# layout and records unavailable local-only inputs explicitly.
+extends: ../../src/marine_mammal_toolkit/resources/killer_whales/sightings.yaml
+
+model_universes:
+  SRKW:
+    polygon: data/sightings/processed/domain/whale_layer/spatial_support/SRKW_MODEL_DOMAIN.parquet
+  TRANSIENT:
+    polygon: data/sightings/processed/domain/whale_layer/spatial_support/TRANSIENT_MODEL_DOMAIN.parquet
+
+water_network_config: ../toolkit-seascape/config/common.yaml
+
+collection:
+  sources:
+    twm:
+      # TWM is a local export, not a network provider. Populate this directory
+      # with scripts/import_legacy_sightings_inputs.py before collection.
+      enabled: true
+      local_path: data/sightings/source_inputs/twm
+    acartia:
+      local_path: data/sightings/source_inputs/acartia
+
+imputation:
+  inputs:
+    observations: data/sightings/processed/sightings/normalized/observations.parquet
+    associations: data/sightings/processed/sightings/normalized/associations.parquet
+    water_network_config: ../toolkit-seascape/config/common.yaml
+  artifacts:
+    models_dir: data/sightings/models/sighting_imputation
+    output: data/sightings/processed/sightings/imputed/imputed-sightings.parquet

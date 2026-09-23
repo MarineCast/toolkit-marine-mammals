@@ -702,7 +702,7 @@ def build_counts(request: CountRequest) -> StageResult:
     )
     manifest_path = (
         request.data_root
-        / f"processed/domain/whale_layer/sightings/manifests/counts/{signature}.json"
+        / f"processed/sightings/final/manifests/counts/{signature}.json"
     )
     resumed = resume_result(
         enabled=request.resume,
@@ -815,7 +815,7 @@ def build_counts(request: CountRequest) -> StageResult:
 
     prior_period_root = (
         request.data_root
-        / f"processed/domain/whale_layer/sightings/counts/mode={request.mode.value}/period_totals"
+        / f"processed/sightings/final/counts/mode={request.mode.value}/period_totals"
     )
     prior_files = sorted(prior_period_root.rglob("*.parquet"))
     prior_periods = (
@@ -880,7 +880,7 @@ def build_counts(request: CountRequest) -> StageResult:
                 dataset_id,
                 root,
                 request.data_root
-                / f"processed/domain/whale_layer/sightings/counts/mode={request.mode.value}/{name}",
+                / f"processed/sightings/final/counts/mode={request.mode.value}/{name}",
             )
         )
     candidate_reports.extend(
@@ -911,7 +911,7 @@ def build_counts(request: CountRequest) -> StageResult:
         )
     destination_root = (
         request.data_root
-        / f"processed/domain/whale_layer/sightings/counts/mode={request.mode.value}"
+        / f"processed/sightings/final/counts/mode={request.mode.value}"
     )
     if destination_root.exists() and not request.force:
         raise FileExistsError(f"Count products exist; pass --force: {destination_root}")
@@ -982,8 +982,7 @@ def build_counts(request: CountRequest) -> StageResult:
     )
     manifest.write(manifest_path, overwrite=request.force)
     latest_pointer = (
-        request.data_root
-        / "processed/domain/whale_layer/sightings/manifests/counts/latest.json"
+        request.data_root / "processed/sightings/final/manifests/counts/latest.json"
     )
     atomic_write_json(
         latest_pointer,

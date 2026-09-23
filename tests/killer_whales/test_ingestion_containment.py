@@ -247,7 +247,7 @@ def test_collection_window_rejects_reverse_and_future_ranges() -> None:
         )
 
 
-def test_partial_api_windows_are_delta_upserts_even_during_refresh() -> None:
+def test_first_bounded_window_initializes_and_existing_windows_upsert() -> None:
     _document, config = load_sightings_config(
         project_root() / "config/data/sightings.yaml"
     )
@@ -263,11 +263,11 @@ def test_partial_api_windows_are_delta_upserts_even_during_refresh() -> None:
     )
     assert (
         collection._range_snapshot_mode("gbif", date(2020, 1, 1), config)
-        == "DELTA_UPSERT"
+        == "FULL_REPLACE"
     )
     assert (
         collection._range_snapshot_mode("inaturalist", date(2020, 1, 1), config)
-        == "DELTA_UPSERT"
+        == "FULL_REPLACE"
     )
 
 
@@ -352,8 +352,8 @@ def test_failed_later_source_does_not_advance_any_latest_pointer(
 def test_policy_change_propagates_without_moving_first_seen_availability(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    processed_root = tmp_path / "processed/domain/whale_layer/sightings"
-    state_root = processed_root / "_state"
+    processed_root = tmp_path / "processed/sightings/normalized"
+    state_root = processed_root / "state"
     state_root.mkdir(parents=True)
     first_seen = datetime(2025, 1, 2, tzinfo=timezone.utc)
     refreshed = datetime(2025, 1, 3, tzinfo=timezone.utc)

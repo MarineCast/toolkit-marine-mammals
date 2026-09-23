@@ -4,12 +4,6 @@ from marine_mammal_toolkit.tools.schemas.artifacts import ArtifactRef
 from marine_mammal_toolkit.tools._core.data import StageResult
 from marine_mammal_toolkit.tools._core.data import ValidationReport
 
-from marine_mammal_toolkit.tools.observations.post_process.aggregation import (
-    build_intensity,
-)
-from marine_mammal_toolkit.tools.observations.post_process.aggregation import (
-    build_model_grid,
-)
 from marine_mammal_toolkit.tools.observations.collect.pipeline import collect_sightings
 from marine_mammal_toolkit.tools.schemas.observations import CountRequest
 from marine_mammal_toolkit.tools.schemas.observations import ImputationRequest
@@ -17,7 +11,6 @@ from marine_mammal_toolkit.tools.schemas.observations import IntensityRequest
 from marine_mammal_toolkit.tools.schemas.observations import ModelGridRequest
 from marine_mammal_toolkit.tools.schemas.observations import NormalizationRequest
 from marine_mammal_toolkit.tools.schemas.observations import SightingsCollectionRequest
-from marine_mammal_toolkit.tools.observations.post_process.counts import build_counts
 from marine_mammal_toolkit.tools.observations.process.pipeline import (
     normalize_sightings,
 )
@@ -45,14 +38,26 @@ def impute(request: ImputationRequest) -> StageResult:
 
 
 def counts(request: CountRequest) -> StageResult:
+    from marine_mammal_toolkit.tools.observations.post_process.counts import (
+        build_counts,
+    )
+
     return build_counts(request)
 
 
 def model_grid(request: ModelGridRequest) -> StageResult:
+    from marine_mammal_toolkit.tools.observations.post_process.aggregation import (
+        build_model_grid,
+    )
+
     return build_model_grid(request)
 
 
 def intensity(request: IntensityRequest) -> StageResult:
+    from marine_mammal_toolkit.tools.observations.post_process.aggregation import (
+        build_intensity,
+    )
+
     return build_intensity(request)
 
 

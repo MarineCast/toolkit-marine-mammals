@@ -101,3 +101,18 @@ PYTHONPATH=src python -m pytest tests/test_marine_mammal_publication.py \
   tests/test_sightings_downstream_contracts.py tests/publishing tests/evaluation -q
 git diff --check
 ```
+
+## Public-use follow-up — 2026-09-23
+
+The public query facade now isolates dataset/date/geography selections and supports
+bounded initial queries. Omitted providers are disabled; absent TWM inputs are
+explicitly unavailable and warn rather than stopping other sources. Normalization
+v10 removes unselected sources from active state while retaining source history.
+Seascape/modeling and Plotly reporting dependencies are optional extras. The earlier
+boolean-inversion deprecation was corrected to boolean negation; label/count
+certification gates remain in place. Product schema v2 pointers bind immutable
+tables, manifests, and reports; compatibility flat files are not the concurrent
+reader contract. Pruning is opt-in. See [public usage](public-usage.md).
+
+The earlier extraction checks above are historical; they do not establish current
+live-provider availability, cross-platform CI execution, or regional model readiness.

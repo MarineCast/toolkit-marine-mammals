@@ -68,6 +68,17 @@ class SightingsReleaseArtifact:
 
 
 RELEASE_PROFILES: Mapping[str, SightingsReleaseProfile] = {
+    "observations-only": SightingsReleaseProfile(
+        name="observations-only",
+        resolutions=(),
+        frequencies=(),
+        include_imputation=False,
+        include_counts=False,
+        include_model_grid=False,
+        include_intensity=False,
+        require_verified_cohort=False,
+        public_by_default=False,
+    ),
     "imputation-only": SightingsReleaseProfile(
         name="imputation-only",
         resolutions=(),
@@ -383,6 +394,11 @@ def promote_sightings_release(
     except Exception:
         shutil.rmtree(generation, ignore_errors=True)
         raise
+    finally:
+        try:
+            staging_parent.rmdir()
+        except OSError:
+            pass
     return final_manifest
 
 

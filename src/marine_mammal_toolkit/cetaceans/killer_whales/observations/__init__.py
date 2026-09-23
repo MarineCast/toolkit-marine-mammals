@@ -3,6 +3,14 @@
 from importlib import import_module
 
 _EXPORTS = {
+    "query_observations": (
+        "marine_mammal_toolkit.cetaceans.killer_whales.query",
+        "query_observations",
+    ),
+    "resolve_sightings_product": (
+        "marine_mammal_toolkit.cetaceans.killer_whales.observations.product",
+        "resolve_sightings_product",
+    ),
     "CountRequest": (
         "marine_mammal_toolkit.tools.schemas.observations",
         "CountRequest",
@@ -30,6 +38,10 @@ _EXPORTS = {
     "validate_sightings_release": (
         "marine_mammal_toolkit.cetaceans.killer_whales.observations.release",
         "validate_sightings_release",
+    ),
+    "build_sightings_report_html": (
+        "marine_mammal_toolkit.cetaceans.killer_whales.observations.report",
+        "build_sightings_report_html",
     ),
     "SightingsPipelineRunRequest": (
         "marine_mammal_toolkit.cetaceans.killer_whales.pipeline",

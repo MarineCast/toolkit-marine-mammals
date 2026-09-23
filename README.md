@@ -30,24 +30,133 @@ features/policies; this is not a new general multiclass method.
 
 ## Install and run
 
-The package requires Python 3.11 or newer. From this repository:
+The base package requires Python 3.11+ and supports observation queries without OrcaCast,
+Seascape, regional support files, or trained models. From this standalone checkout:
 
 ```bash
-python -m pip install -e '.[dev]'
-marine-mammals --workspace-root /absolute/data-workspace killer-whales observations run \
-  --profile observed-only --end-date 2025-06-08 --dry-run
+python -m pip install .
+marine-mammals --workspace-root ./orca-workspace killer-whales observations demo
+marine-mammals --workspace-root ./orca-workspace killer-whales observations query \
+  --source inaturalist --start 2025-06-01 --end 2025-06-08 --bbox -126 47 -122 50
 ```
 
-Install the declared `toolkit-seascape` dependency normally (from its own checkout if it is not
-available from your package index). No OrcaCast installation or sibling source-path injection is
-required. Canonical YAML configurations ship in the wheel. Relative data/model/output paths require
-an explicit workspace; includes resolve relative to their declaring file.
+The demo is synthetic and offline. Real queries contact the selected providers. Use `sources`
+to discover providers and GBIF datasets, `--dataset UUID` to select GBIF datasets, and `preflight`
+to check local prerequisites. See **[public usage and installation](docs/public-usage.md)** for
+complete CLI/Python examples, provider limitations, optional dependencies, and retention.
 
-Observation commands: `collect`, `process`, `impute fit`, `impute apply`, `post-process counts`,
-`post-process model-grid`, `post-process intensity`, `post-process all`, `post-process model-domains`,
-`run`, and `validate`. Population export: `killer-whales populations run`.
-Use each command's `--help` for manifest inputs and overwrite/resume controls. `run` performs gated
-release promotion; it is not a read-only validation command.
+Canonical YAML configurations ship in the wheel. Paths require an explicit workspace;
+configuration includes resolve relative to their declaring file. Existing advanced stage commands
+remain available: `collect`, `process`, `impute fit`, `impute apply`, `post-process`, `run`,
+`product`, `report`, and `validate`. `run` promotes a local release; it is not read-only.
+Install `.[imputation,report]` for the full modeling workflow and `.[dev,imputation,report]`
+for the complete test suite. The Seascape optional dependency must be available from your index
+or installed from its independent checkout.
+
+### Repository sightings workspace
+
+The checkout-local configuration at `config/killer_whales/sightings.yaml` keeps raw snapshots,
+normalized tables, manifests, candidates, models, and immutable releases below
+`data/sightings/`. It inherits the packaged scientific configuration.
+
+For existing research workspaces, TWM history and Acartia's supplemental history can optionally
+be imported from retained local inputs. This is not required for the public query workflow:
+
+```bash
+python scripts/import_legacy_sightings_inputs.py \
+  --legacy-data-root /absolute/path/to/OrcaCast/data
+```
+
+The importer copies only pipeline-supported TWM and Acartia CSV inputs, preserves Acartia's archive
+layout, verifies every copied checksum, and writes
+`data/sightings/source_inputs/_import_manifest.json`. It deliberately excludes the unsupported BC
+ArcGIS export and redundant iNaturalist CSV exports. These inputs remain ignored, internal-only
+data because redistribution rights have not been established; they must not be committed merely
+because they are stored inside the checkout. Missing TWM files produce a warning and an explicit
+unavailable-source manifest; other selected providers continue. Missing TWM coverage is not treated as zero sightings.
+
+Collect, normalize, and promote the source-observation release without requiring seascape count
+universes or an imputation model:
+
+```bash
+PYTHONPATH=src python -m marine_mammal_toolkit \
+  --workspace-root "$PWD" \
+  --data-root data/sightings \
+  --artifact-root data/sightings/artifacts \
+  --output-root data/sightings/outputs \
+  killer-whales observations run \
+  --config config/killer_whales/sightings.yaml \
+  --profile observations-only \
+  --end-date YYYY-MM-DD
+```
+
+The promoted pointer is
+`data/sightings/processed/sightings/final/releases/latest.json`. The other profiles
+continue into imputation and/or counts and retain their existing seascape and certification
+prerequisites.
+
+For an application-local product, pass `--product-root` to the same importer. It provisions the
+retained source inputs, model domains, and H3 r6 water support under that product's `raw/` tree.
+The packaged `killer-whales observations product` command then keeps normalization state under
+`processed/sightings/normalized/`, model work under `processed/sightings/imputed/`, and publishes
+the stable consumer contract under `processed/sightings/final/`. The final directory contains
+`composite-sightings.parquet`, `imputed-sightings.parquet`, `imputation-model-manifest.json`, and
+`sightings-report.html`, an interactive report with the all-time density of reported sightings and
+daily counts over time. Historical products are retained by default. Pass
+`--prune --keep-generations 3` to opt in to guarded retention, with `--pin-release ID` to protect additional releases and their model runs.
+The row-count guard prevents deletion when counts decrease or increase by more than 10%;
+`--max-growth-fraction` adjusts that deletion guard. It does not reject the new product.
+Raw provider snapshots and compact stage manifests are not pruned by this policy. Omit `--full-refresh`
+for a watermark-based update; ranged APIs use the configured overlap and non-destructive delta upserts.
+The imputed table preserves observation identity and abstentions, and remains label imputation—not
+occurrence prediction.
+
+The product command owns that internal layout, so it does not require separate artifact or output
+roots. Point `--data-root` at the killer-whale product root:
+
+```bash
+marine-mammals --workspace-root /absolute/orcacast \
+  --data-root data/marine-mammals/killer-whales \
+  killer-whales observations product --end-date YYYY-MM-DD
+```
+
+The packaged product configuration is the default. To use a custom complete sightings YAML (or a
+thin YAML that `extends` another configuration), add the optional flag:
+
+```bash
+marine-mammals --workspace-root /absolute/orcacast \
+  --data-root data/marine-mammals/killer-whales \
+  killer-whales observations product \
+  --config config/killer_whales/custom-sightings.yaml \
+  --end-date YYYY-MM-DD
+```
+
+Relative `--config` paths and configured data paths resolve against `--workspace-root`; relative
+`extends` paths resolve against the YAML file that declares them.
+
+It creates and writes this durable structure; temporary `.staging/` and
+`_sightings_product_runs/` directories are removed after a successful materialization:
+
+```text
+data/marine-mammals/killer-whales/
+├── raw/
+└── processed/sightings/
+    ├── normalized/
+    ├── imputed/
+    └── final/
+```
+
+Rebuild only the HTML from the current stable product, without collection or model fitting:
+
+```bash
+marine-mammals --workspace-root /absolute/orcacast \
+  --data-root data/marine-mammals/killer-whales \
+  killer-whales observations report --force
+```
+
+The density map aggregates every valid coordinate to H3 resolution 6 for display. Both charts
+describe reported records, not abundance, occupancy, reporting effort, or verified absence; map
+tiles are loaded when the report is opened.
 
 Marine-distance imputation and intensity require existing seascape products. Supply
 `imputation.inputs.water_network_config` and `water_network_config`, and set `SEASCAPE_WORKSPACE`
@@ -57,23 +166,20 @@ an absolute data base to seascape; it does not copy producers or build water net
 ## Python API
 
 ```python
-from pathlib import Path
-from marine_mammal_toolkit.tools._core.config import workspace
-from marine_mammal_toolkit.cetaceans.killer_whales.resources import config_path
-from marine_mammal_toolkit.cetaceans.killer_whales.configuration import load_sightings_config
-from marine_mammal_toolkit.cetaceans.killer_whales.observations import (
-    collect, process, impute, counts, model_grid, intensity, validate,
-    SightingsCollectionRequest, NormalizationRequest, ImputationRequest,
-    CountRequest, ModelGridRequest, IntensityRequest,
-)
+from datetime import date
+from marine_mammal_toolkit.cetaceans.killer_whales.query import query_observations
 
-root = Path('/absolute/data-workspace')
-document, settings = load_sightings_config(config_path(), workspace_root=root)
-# Supply explicit ArtifactRef inputs and data/artifact/output roots to stage requests.
-# Bind the workspace around composed stages that also resolve model/domain paths.
-with workspace(root):
-    pass  # Invoke only the stages needed for your workflow.
+result = query_observations(
+    workspace_root="./orca-workspace", sources=("inaturalist",),
+    start=date(2025, 6, 1), end=date(2025, 6, 8), bbox=(-126, 47, -122, 50),
+)
+observations = result.read()
+print(result.manifest)
 ```
+
+Read `latest.json` once or use `resolve_sightings_product()` for a consistent immutable product
+generation. Flat product filenames are compatibility copies; see the [publication contract](docs/public-usage.md#product-publication-and-retention).
+
 
 Callable clients under `tools.observations.collect.sources` cover TWM, Acartia, Maplify,
 iNaturalist, CWR and GBIF. They accept explicit provider settings and injected HTTP callables;

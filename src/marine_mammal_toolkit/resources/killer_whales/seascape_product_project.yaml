@@ -1,0 +1,4 @@
+# Portable read-only entrypoint for an application-local seascape support copy.
+# The Make target binds this absolute root explicitly.
+base_directory: ${env:SEASCAPE_WORKSPACE}
+SEASCAPE_LAYER: environment_seascape.yaml

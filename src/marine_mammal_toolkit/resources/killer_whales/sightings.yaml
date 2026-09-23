@@ -157,12 +157,12 @@ kernel:
   combine: noisy_or
 imputation:
   inputs:
-    observations: data/processed/domain/whale_layer/sightings/observations.parquet
-    associations: data/processed/domain/whale_layer/sightings/associations.parquet
+    observations: data/processed/sightings/normalized/observations.parquet
+    associations: data/processed/sightings/normalized/associations.parquet
     water_network_config: config/data/environment_seascape.yaml
   artifacts:
     models_dir: models/sighting_imputation
-    output: data/processed/domain/whale_layer/sightings/imputed_retrospective.parquet
+    output: data/processed/sightings/imputed/imputed-sightings.parquet
   regime: retrospective
   evaluate_strategies: [reconstruction, encounter, blocked, purged_blocked]
   feature:

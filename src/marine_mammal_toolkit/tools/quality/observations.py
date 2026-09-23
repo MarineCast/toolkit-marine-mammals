@@ -767,7 +767,7 @@ def validate_sightings_artifact(artifact: ArtifactRef) -> ValidationReport:
     frame = table.to_pandas()
     errors.extend(_domain_errors(frame, dataset_id))
     if dataset_id == "whale.sightings.normalization_audit":
-        source_path = path.parent / "_state/source_current.parquet"
+        source_path = path.parent / "state/source_current.parquet"
         if source_path.exists():
             source_ids = set(
                 pd.read_parquet(

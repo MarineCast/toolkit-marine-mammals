@@ -30,3 +30,7 @@ New producer revisions hash installed source/config content independently of cal
 Historical manifests remain readable; provenance changes do not confer release approval.
 OrcaCast owns occurrence/forecast modeling, evaluation and publishing, and adapts the toolkit
 dataset catalog. No runtime toolkit import may depend on OrcaCast.
+
+The public observation-query facade is `cetaceans/killer_whales/query.py`; it composes the same
+collection and normalization stages with isolated query scopes. See [public usage](public-usage.md)
+for provider selection, optional modeling dependencies, product resolution, and retention.

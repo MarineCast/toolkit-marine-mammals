@@ -187,15 +187,15 @@ def test_cwr_configuration_and_catalog_contract():
     assert "whale.sightings.source_cwr" in {str(item) for item in dependencies}
 
 
-def test_cwr_configuration_rejects_missing_year(tmp_path):
+def test_omitted_cwr_source_is_disabled(tmp_path):
     payload = yaml.safe_load(
         (project_root() / "config/data/sightings.yaml").read_text(encoding="utf-8")
     )
     payload["collection"]["sources"].pop("cwr")
     path = tmp_path / "sightings.yaml"
     path.write_text(yaml.safe_dump(payload), encoding="utf-8")
-    with pytest.raises(ValueError, match="Missing source configuration"):
-        load_sightings_config(path)
+    _, settings = load_sightings_config(path)
+    assert not settings.collection.sources["cwr"].enabled
 
 
 def test_wix_index_parsing_keeps_sequences_and_uav_distinct():

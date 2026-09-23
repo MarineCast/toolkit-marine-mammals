@@ -1958,7 +1958,7 @@ class SelectiveDateContextImputer:
             soft_candidate
             & stability_evaluated
             & prediction_stable
-            & ~certification_release_ready(soft_mass_certification)
+            & (not certification_release_ready(soft_mass_certification))
         )
         reason[soft_not_certified] = "SOFT_MASS_NOT_CERTIFIED"
         soft_stratum_not_certified = (

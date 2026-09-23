@@ -71,8 +71,8 @@ def _history(record: dict[str, object], retrieval_id: str) -> dict[str, object]:
 
 
 def _state_root(tmp_path: Path) -> Path:
-    root = tmp_path / "processed/domain/whale_layer/sightings"
-    (root / "_state").mkdir(parents=True)
+    root = tmp_path / "processed/sightings/normalized"
+    (root / "state").mkdir(parents=True)
     return root
 
 
@@ -84,11 +84,11 @@ def test_already_applied_snapshots_reuse_only_compatible_source_state(
     record = _record("TWM:1", '{"id":"1"}', stamp)
     pq.write_table(
         pa.Table.from_pylist([_history(record, "r1")], schema=SOURCE_HISTORY_SCHEMA),
-        root / "_state/source_history.parquet",
+        root / "state/source_history.parquet",
     )
     pq.write_table(
         pa.Table.from_pylist([record], schema=SOURCE_RECORD_SCHEMA),
-        root / "_state/source_current.parquet",
+        root / "state/source_current.parquet",
     )
     pq.write_table(
         pa.Table.from_pylist(
@@ -122,7 +122,7 @@ def test_already_applied_snapshots_reuse_only_compatible_source_state(
     manifest.write_text(
         json.dumps(
             {
-                "workflow": "whale.sightings.normalize.v8",
+                "workflow": "whale.sightings.normalize.v10",
                 "config_hash": "fixture-config",
                 "inputs": [
                     {
@@ -194,11 +194,11 @@ def test_history_delta_keeps_payload_transitions_without_rewriting_prior_rows(
             [_history(first, "r1")],
             schema=SOURCE_HISTORY_SCHEMA,
         ),
-        root / "_state/source_history.parquet",
+        root / "state/source_history.parquet",
     )
     pq.write_table(
         pa.Table.from_pylist([first], schema=SOURCE_RECORD_SCHEMA),
-        root / "_state/source_current.parquet",
+        root / "state/source_current.parquet",
     )
     snapshot = tmp_path / "snapshot"
     snapshot.mkdir()
@@ -237,8 +237,7 @@ def test_history_delta_append_migrates_single_file_to_partitioned_dataset(
     artifact_root = tmp_path / "artifacts"
     output_root = tmp_path / "outputs"
     destination = (
-        data_root
-        / "processed/domain/whale_layer/sightings/_state/source_history.parquet"
+        data_root / "processed/sightings/normalized/state/source_history.parquet"
     )
     destination.parent.mkdir(parents=True)
     t1 = datetime(2025, 1, 1, tzinfo=timezone.utc)

@@ -18,7 +18,7 @@ jobs:
         run: >-
           python -m pip install
           'toolkit-seascape @ git+https://github.com/MarineCast/toolkit-seascape.git@deeb1974c4f5270c831d5dc96e902b3b43a4d4dd'
-      - run: python -m pip install -e '.[dev]'
+      - run: python -m pip install -e '.[dev,imputation,report]'
       - run: python -m pip check
       - run: python -m pytest tests -q
       - run: python -m pytest notebooks/cetaceans/killer_whales/imputation/testing --import-mode=prepend -q
@@ -51,3 +51,24 @@ jobs:
           PY
           "$wheel_env/bin/marine-mammals" --help
       - run: git diff --check
+
+  public-install:
+    name: Public install (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ['3.11', '3.14']
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install build
+      - run: python -m build --wheel --outdir "$RUNNER_TEMP/public-dist"
+      - name: Clean dependency solve and installed query outside checkout
+        run: python scripts/check_public_install.py --wheel-dir "$RUNNER_TEMP/public-dist"

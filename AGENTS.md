@@ -39,14 +39,14 @@ require an OrcaCast checkout at runtime.
   must not grant soft-count certification. Never rewrite existing trained models during migration.
 - Require an explicit workspace for relative data/model/output paths. Includes resolve relative
   to their declaring file. Canonical configs are installed resources, not checkout paths.
-- Seascape is a declared dependency; use its public water-network API through the explicit-base
+- Seascape is a declared optional dependency of the `imputation` extra; use its public water-network API through the explicit-base
   integration helper. `SEASCAPE_WORKSPACE` selects its named-area configuration. Never copy producers.
 - Dataset identifiers, `orca:v4:` identities, Arrow schemas, rights and missingness remain compatible.
   Source-content producer revisions intentionally change under the toolkit namespace.
 
 ## Validation
 
-Before edits, run `git status --short` and preserve unrelated changes. Run `python -m pytest tests`
+Before edits, run `git status --short` and preserve unrelated changes. Install `.[dev,imputation,report]` for the full suite. Run `python -m pytest tests`
 and `python -m pytest notebooks/cetaceans/killer_whales/imputation/testing --import-mode=prepend`.
 Run `git diff --check` and installed-wheel/CLI smoke checks after packaging changes. The integration
 tests use only synthetic temporary storage. Do not run live acquisition, production fitting,

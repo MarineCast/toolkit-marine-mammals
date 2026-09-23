@@ -409,9 +409,13 @@ def test_gbif_collection_is_full_replace_and_reuses_offline_snapshot(
         "citation": {"text": "Fixture citation"},
         "_orcacast_policy": _policy(),
     }
-    monkeypatch.setattr(
-        collection, "_fetch_gbif", lambda *args: ([_row("1")], [metadata])
-    )
+    requested_windows = []
+
+    def fetch(_config, start, end):
+        requested_windows.append((start, end))
+        return [_row("1")], [metadata]
+
+    monkeypatch.setattr(collection, "_fetch_gbif", fetch)
     online = collect_sightings(
         SightingsCollectionRequest(
             config=config_path,
@@ -432,6 +436,23 @@ def test_gbif_collection_is_full_replace_and_reuses_offline_snapshot(
     assert {"payload.json", "datasets.json", "gbif_policy.json"} <= set(
         snapshot_metadata["file_checksums"]
     )
+    assert requested_windows == [(date(1980, 1, 1), date(2025, 12, 31))]
+
+    updated = collect_sightings(
+        SightingsCollectionRequest(
+            config=config_path,
+            data_root=tmp_path / "data",
+            artifact_root=tmp_path / "artifacts",
+            output_root=tmp_path / "outputs",
+            run_id="update",
+            end_date=date(2026, 1, 2),
+            force=True,
+        )
+    )
+    updated_snapshot = updated.outputs[0].path
+    updated_metadata = yaml.safe_load((updated_snapshot / "snapshot.json").read_text())
+    assert updated_metadata["snapshot_mode"] == "DELTA_UPSERT"
+    assert requested_windows[-1] == (date(2025, 12, 29), date(2026, 1, 2))
 
     offline = collect_sightings(
         SightingsCollectionRequest(
@@ -440,12 +461,12 @@ def test_gbif_collection_is_full_replace_and_reuses_offline_snapshot(
             artifact_root=tmp_path / "artifacts",
             output_root=tmp_path / "outputs",
             run_id="offline",
-            end_date=date(2025, 12, 31),
+            end_date=date(2026, 1, 2),
             offline=True,
             force=True,
         )
     )
-    assert offline.outputs[0].path == snapshot
+    assert offline.outputs[0].path == updated_snapshot
     assert offline.outputs[0].freshness == "offline"
 
 
