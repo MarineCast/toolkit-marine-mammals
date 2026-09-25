@@ -116,3 +116,13 @@ reader contract. Pruning is opt-in. See [public usage](public-usage.md).
 
 The earlier extraction checks above are historical; they do not establish current
 live-provider availability, cross-platform CI execution, or regional model readiness.
+
+## Demography entry point — 2026-09-25
+
+The extracted SRKW annual census exporter is now the maintained
+`cetaceans.killer_whales.demography` API and `killer-whales demography census` CLI.
+Its workbook validation, annual rows, mismatch handling, and schema-version-1 JSON
+remain the same. `cetaceans.killer_whales.populations.prepare` and
+`killer-whales populations run` remain compatible for existing OrcaCast consumers.
+The new CLI accepts a caller's workbook, sheet, and output paths; it does not
+acquire census data or infer other demographic rates. See [demography](demography.md).

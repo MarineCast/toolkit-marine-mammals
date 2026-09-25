@@ -6,7 +6,7 @@
 | Processing | `tools/observations/process`: adapters, canonical records, deduplication, identity, quarantine, audit | `observations/interpretation.py`: recognition, ecotypes, evidence and ID prefix |
 | Imputation | `tools/observations/impute`: fitting, inference, calibration, splits, encounters, certification, reports and marine routing | `observations/features.py`, `imputation_policy.py`, `imputer.py`, `imputation.py` |
 | Post-processing | `tools/observations/post_process`: counts, grids, intensity and spatial operations | Count policy, domain definitions and output mappings |
-| Populations | `tools/populations/workbook.py`: headers, integers, annual ordering, reconciliation; shared atomic persistence | `populations/prepare.py`: SRKW aliases, J/K/L totals and JSON |
+| Demography | `tools/populations/workbook.py`: headers, integers, annual ordering, reconciliation; shared atomic persistence | `demography/census.py`: SRKW aliases, J/K/L totals and JSON; `populations/prepare.py` remains an import-compatible wrapper |
 | Releases | Shared artifact contracts and validators | `pipeline.py`, `observations/release.py`: profiles, orchestration and gates |
 
 Paths are beneath `src/marine_mammal_toolkit`. Contracts live in `tools/schemas`, validation in
@@ -18,7 +18,8 @@ Species stage APIs expose `collect`, `process`/`normalize`, `impute`, `counts`, 
 are in `observations.imputation`: `fit_imputation_model`, `apply_imputation_model`, and
 `run_imputation_workflow`. `tools.observations.post_process.pipeline.post_process_observations`
 composes counts, grids and intensity from explicit artifact inputs. Population export is
-`populations.prepare.export_population_numbers`, accepting workspace/source/output overrides.
+`demography.export_population_numbers`, accepting workspace/source/output and sheet overrides.
+See the [demography guide](demography.md) for its CLI and annual-census contract.
 
 The reusable binary engine receives feature building, frame preparation, acceptance policy and
 support veto through `ImputationComponents`; fitting workflows accept an imputer factory.

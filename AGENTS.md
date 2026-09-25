@@ -6,10 +6,12 @@ This repository owns reusable marine-mammal observation, population, taxonomy, t
 acoustic, schema, and quality-control code. Species and clade-specific namespaces live beneath
 `cetaceans` and `pinnipeds`.
 
-Killer-whale observations and census processing are implemented. Shared engines live in
-`tools/observations/{collect,process,impute,post_process}` and `tools/populations`;
+Killer-whale observations and SRKW annual census processing are implemented. Shared engines live
+in `tools/observations/{collect,process,impute,post_process}` and `tools/populations`;
 species interpretation, feature construction, acceptance policy, release profiles, and census
-presentation live in `cetaceans/killer_whales`. Other species remain extension points.
+presentation live in `cetaceans/killer_whales`. The maintained census API is
+`cetaceans/killer_whales/demography`; `populations/prepare.py` preserves old consumer imports.
+Other species remain extension points.
 Read `docs/migration.md` before changing compatibility or ownership boundaries.
 
 ## Shared MarineCast context

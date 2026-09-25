@@ -16,6 +16,8 @@ src/marine_mammal_toolkit/
 │   └── _core/          # Configuration and atomic persistence
 ├── cetaceans/
 │   ├── killer_whales/
+│   │   ├── demography/  # SRKW annual census validation and export
+│   │   └── populations/ # Existing import path, kept for compatibility
 │   ├── humpbacks/
 │   └── gray_whales/
 └── pinnipeds/
@@ -24,7 +26,7 @@ src/marine_mammal_toolkit/
     └── sea_lions/
 ```
 
-Killer-whale species rules, features, acceptance policies, release profiles and population JSON
+Killer-whale species rules, features, acceptance policies, release profiles and demography JSON
 presentation live under `cetaceans/killer_whales`. The reusable binary engine accepts injected
 features/policies; this is not a new general multiclass method.
 
@@ -43,7 +45,9 @@ marine-mammals --workspace-root ./orca-workspace killer-whales observations quer
 The demo is synthetic and offline. Real queries contact the selected providers. Use `sources`
 to discover providers and GBIF datasets, `--dataset UUID` to select GBIF datasets, and `preflight`
 to check local prerequisites. See **[public usage and installation](docs/public-usage.md)** for
-complete CLI/Python examples, provider limitations, optional dependencies, and retention.
+complete CLI/Python examples, provider limitations, result locations, optional dependencies, and
+retention. A query writes canonical observations and a provenance manifest beneath its own
+`<data-root>/queries/` directory; it does not promote a sightings release.
 
 Canonical YAML configurations ship in the wheel. Paths require an explicit workspace;
 configuration includes resolve relative to their declaring file. Existing advanced stage commands
@@ -60,7 +64,8 @@ normalized tables, manifests, candidates, models, and immutable releases below
 `data/sightings/`. It inherits the packaged scientific configuration.
 
 For existing research workspaces, TWM history and Acartia's supplemental history can optionally
-be imported from retained local inputs. This is not required for the public query workflow:
+be imported from retained local inputs. The importer expects both source CSV collections; a new
+workspace can query other providers without them:
 
 ```bash
 python scripts/import_legacy_sightings_inputs.py \
@@ -95,8 +100,11 @@ The promoted pointer is
 continue into imputation and/or counts and retain their existing seascape and certification
 prerequisites.
 
-For an application-local product, pass `--product-root` to the same importer. It provisions the
-retained source inputs, model domains, and H3 r6 water support under that product's `raw/` tree.
+For an application-local product with retained OrcaCast inputs, pass `--product-root` to the same
+importer. It requires the historical source CSVs, model domains, and H3 r6 water support, then
+copies them under that product's `raw/` tree. A new workspace needs separately provisioned
+model and water-support inputs before running `product`; missing TWM files alone do not block
+collection. Install `.[imputation,report]` for this command.
 The packaged `killer-whales observations product` command then keeps normalization state under
 `processed/sightings/normalized/`, model work under `processed/sightings/imputed/`, and publishes
 the stable consumer contract under `processed/sightings/final/`. The final directory contains
@@ -179,6 +187,23 @@ print(result.manifest)
 
 Read `latest.json` once or use `resolve_sightings_product()` for a consistent immutable product
 generation. Flat product filenames are compatibility copies; see the [publication contract](docs/public-usage.md#product-publication-and-retention).
+
+## Killer-whale demography
+
+The `demography` component validates an annual Southern Resident census workbook and exports
+J, K and L pod counts. Supply your own workbook; no census data ships with the package:
+
+```bash
+marine-mammals --workspace-root /absolute/workspace killer-whales demography census \
+  --workbook /absolute/path/to/census.xlsx --sheet 'Chart Data' \
+  --output data/processed/whales/srkw-census.json --dry-run
+```
+
+Remove `--dry-run` to write the JSON atomically. Add `--fail-on-total-mismatch` to reject rows
+whose reported all-pods count differs from J + K + L. The previous
+`killer-whales populations run` command and Python import path remain available to existing
+consumers. See the [demography guide](docs/demography.md) for the Python API, input rules and
+scientific limits.
 
 
 Callable clients under `tools.observations.collect.sources` cover TWM, Acartia, Maplify,

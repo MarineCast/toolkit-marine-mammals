@@ -14,6 +14,7 @@ NAMESPACES = (
     "quality",
     "cetaceans",
     "cetaceans.killer_whales",
+    "cetaceans.killer_whales.demography",
     "cetaceans.humpbacks",
     "cetaceans.gray_whales",
     "pinnipeds",

@@ -231,7 +231,7 @@ def post_process():
 
 @killer_whales.group()
 def populations():
-    """Process annual population census inputs."""
+    """Legacy command for annual population census exports."""
 
 
 @populations.command("run")
@@ -253,6 +253,69 @@ def population_run(config, fail_on_total_mismatch, ecotype):
             fail_on_total_mismatch=fail_on_total_mismatch,
         )
     )
+
+
+@killer_whales.group()
+def demography():
+    """Validate and export killer-whale census data."""
+
+
+@demography.command("census")
+@click.option("--workbook", callback=_input_path, type=click.Path(dir_okay=False))
+@click.option("--sheet", "sheet_name")
+@click.option("--output", type=click.Path(dir_okay=False))
+@click.option(
+    "--config",
+    default=lambda: str(config_path("populations")),
+    callback=_input_path,
+    type=click.Path(dir_okay=False),
+)
+@click.option("--fail-on-total-mismatch", is_flag=True)
+@click.option("--dry-run", is_flag=True, help="Validate and summarize without writing JSON.")
+def demography_census(
+    workbook, sheet_name, output, config, fail_on_total_mismatch, dry_run
+):
+    """Export annual SRKW J/K/L pod counts from a workbook."""
+    from .cetaceans.killer_whales.demography import export_population_numbers
+    from .cetaceans.killer_whales.demography import prepare_population_numbers
+
+    arguments = dict(
+        config_path=config,
+        source_path=workbook,
+        output_path=output,
+        sheet_name=sheet_name,
+        ecotype="SRKW",
+    )
+    try:
+        if dry_run:
+            payload, target = prepare_population_numbers(**arguments)
+            mismatches = payload["validation"]["total_mismatch_count"]
+            if fail_on_total_mismatch and mismatches:
+                raise ValueError(
+                    f"Found {mismatches} row(s) where all_pods does not equal "
+                    "j_pod + k_pod + l_pod. No output was written."
+                )
+            click.echo(
+                json.dumps(
+                    {
+                        "source": payload["source"],
+                        "output": str(target),
+                        "ecotype": payload["ecotype"],
+                        "validation": payload["validation"],
+                        "latest": payload["latest"],
+                        "written": False,
+                    },
+                    indent=2,
+                )
+            )
+            return
+        click.echo(
+            export_population_numbers(
+                **arguments, fail_on_total_mismatch=fail_on_total_mismatch
+            )
+        )
+    except (KeyError, OSError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
 
 
 @impute.command("fit")

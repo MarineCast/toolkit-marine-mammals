@@ -84,12 +84,22 @@ print(result.to_dict())
 
 Results include canonical observations, associations, audits, source snapshots, and
 `query-result.json`. Each source/dataset/date/bounds configuration uses its own
-`data/queries/<query-hash>/` directory. Changed selection cannot reuse another
+`<data-root>/queries/<query-hash>/` directory (`data/` is the CLI default).
+`ObservationQueryResult` exposes the observation and association paths, the manifest,
+and `read()` for the canonical observation table. Changed selection cannot reuse another
 query's normalization state. Repeating an identical query updates only that query's
 workspace; raw snapshots and source history remain available. `--offline` replays
 that exact query's local snapshots; it does not silently download missing data.
 No observation-query command fits a model, builds counts, prunes results, or
 publishes datasets externally.
+
+For a validated, immutable **observations-only release** rather than an isolated
+query, use the advanced `run` command with `--profile observations-only` and an
+explicit end date. It collects every enabled source in the selected configuration
+(the packaged configuration enables all six providers), so check `preflight` and
+source access first. This profile does not fit an imputation model or build counts.
+Its release pointer is `<data-root>/processed/sightings/final/releases/latest.json`;
+the `product` command below publishes a separate consumer-facing product pointer.
 
 ## Configuration and preflight
 
@@ -124,6 +134,12 @@ to SRKW/Transient labels with known-Other handling and abstention. Global observ
 queries do not imply global ecotype-imputation support. Existing scientific gates
 are unchanged. `observations-only` stops after normalization; `observed-only`
 also builds counts and requires water-universe inputs.
+
+The `product` command also requires `.[imputation,report]`, model-domain polygons,
+and regional water support. The repository's legacy importer can copy these from a
+retained OrcaCast data workspace when they exist; it is not needed for ordinary
+observation queries and cannot provision a new region from scratch. A missing TWM
+export is allowed during collection, but it does not supply the other model inputs.
 
 ## Product publication and retention
 

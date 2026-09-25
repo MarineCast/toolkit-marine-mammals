@@ -1,10 +1,21 @@
 # Ecotype imputation experiments
 
 This directory is an isolated testing area for whale-sighting imputation work.
-It reads the immutable sightings release selected by
-`data/processed/domain/whale_layer/sightings/releases/latest.json` and writes
-only beneath `outputs/`. It never updates production models, canonical
-Parquet files, or release pointers.
+Set `MARINE_MAMMALS_WORKSPACE_ROOT` to an existing data workspace before running
+the notebooks. As written, they read the immutable release selected by that
+workspace's retained OrcaCast pointer at
+`data/processed/domain/whale_layer/sightings/releases/latest.json` and write
+only beneath this directory's `outputs/`. The release must contain observations,
+imputation diagnostics, and a fitted model; an `observations-only` release or a
+public query is insufficient. The helper `resolve_release_paths` accepts an
+explicit `release_manifest` for other release layouts, but these notebooks use
+the default. They never update production models, canonical Parquet files, or
+release pointers.
+
+From the toolkit checkout root, install it with `.[research,imputation,report]`
+and make the standalone Seascape package available before running the imputation
+notebooks. See the [research setup](../../README.md) for the other required
+workspace paths.
 
 The notebooks are intentionally split:
 
