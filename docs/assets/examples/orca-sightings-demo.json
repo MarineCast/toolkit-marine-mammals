@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "title": "Example orca sightings",
+  "synthetic": true,
+  "purpose": "Fictional records for documentation UI demonstration, not observed sightings or scientific evidence.",
+  "record_grain": "One fictional example record; records are not animal counts.",
+  "date_scope": {"start": "2025-06-01", "end": "2025-06-08"},
+  "coordinates": {"crs": "EPSG:4326", "units": "decimal degrees", "support": "Illustrative point locations, not measured positions."},
+  "labels": "Illustrative SRKW, Transient, and Unresolved labels; no model inference was performed.",
+  "records": [
+    {"id": "EX-001", "date": "2025-06-01", "label": "SRKW", "latitude": 48.49, "longitude": -123.18, "location": "Haro Strait", "synthetic": true},
+    {"id": "EX-002", "date": "2025-06-01", "label": "Transient", "latitude": 48.56, "longitude": -122.76, "location": "Rosario Strait", "synthetic": true},
+    {"id": "EX-003", "date": "2025-06-02", "label": "Unresolved", "latitude": 48.30, "longitude": -123.30, "location": "Strait of Juan de Fuca", "synthetic": true},
+    {"id": "EX-004", "date": "2025-06-02", "label": "SRKW", "latitude": 48.57, "longitude": -123.23, "location": "Haro Strait", "synthetic": true},
+    {"id": "EX-005", "date": "2025-06-03", "label": "Transient", "latitude": 48.68, "longitude": -123.10, "location": "Spieden Channel", "synthetic": true},
+    {"id": "EX-006", "date": "2025-06-04", "label": "Unresolved", "latitude": 48.75, "longitude": -123.11, "location": "Boundary Pass", "synthetic": true},
+    {"id": "EX-007", "date": "2025-06-05", "label": "SRKW", "latitude": 48.43, "longitude": -123.13, "location": "South of San Juan Island", "synthetic": true},
+    {"id": "EX-008", "date": "2025-06-05", "label": "Transient", "latitude": 48.78, "longitude": -123.04, "location": "Boundary Pass", "synthetic": true},
+    {"id": "EX-009", "date": "2025-06-06", "label": "Unresolved", "latitude": 48.62, "longitude": -122.82, "location": "North Rosario Strait", "synthetic": true},
+    {"id": "EX-010", "date": "2025-06-07", "label": "SRKW", "latitude": 48.62, "longitude": -123.22, "location": "North Haro Strait", "synthetic": true},
+    {"id": "EX-011", "date": "2025-06-07", "label": "Transient", "latitude": 48.28, "longitude": -123.46, "location": "Strait of Juan de Fuca", "synthetic": true},
+    {"id": "EX-012", "date": "2025-06-08", "label": "Unresolved", "latitude": 48.96, "longitude": -123.18, "location": "Strait of Georgia", "synthetic": true}
+  ]
+}

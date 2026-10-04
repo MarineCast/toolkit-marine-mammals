@@ -1,0 +1,13 @@
+Leaflet 1.9.4
+https://leafletjs.com/
+
+Distribution assets obtained from the pinned npm package:
+https://unpkg.com/leaflet@1.9.4/dist/
+
+Copyright (c) 2010-2023, Volodymyr Agafonkin
+Copyright (c) 2010-2011, CloudMade
+
+See LICENSE in this directory for the BSD-2-Clause terms.
+Text line endings and trailing whitespace are normalized; assets otherwise retain
+the pinned distribution content. The documentation example uses div icons rather than
+the default marker images; the complete referenced image set is retained for CSS.

@@ -1,0 +1,325 @@
+:root {
+  --md-primary-fg-color: #0b625c;
+  --md-accent-fg-color: #0f766e;
+}
+
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: #fffdf7;
+}
+
+.md-typeset .marine-mammals-hero {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 1;
+  margin-bottom: 1.5rem;
+  border-radius: 0.4rem;
+}
+
+.md-typeset .marine-mammals-lead {
+  font-size: 1.1rem;
+}
+
+.md-typeset .grid.cards > ul > li {
+  border-top: 3px solid var(--md-accent-fg-color);
+}
+
+.md-typeset .sightings-explorer {
+  --sightings-ink: #173b3d;
+  --sightings-muted: #557075;
+  --sightings-border: #d7e1de;
+  --sightings-paper: #ffffff;
+  color: var(--sightings-ink);
+  background: var(--sightings-paper);
+  border: 1px solid var(--sightings-border);
+  border-radius: 0.65rem;
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+
+.sightings-explorer__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.2rem 1.2rem 0.8rem;
+}
+
+.sightings-explorer__eyebrow {
+  color: var(--sightings-muted);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.md-typeset .sightings-explorer__heading h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0.2rem 0 0.25rem;
+}
+
+.md-typeset .sightings-explorer__heading p {
+  color: var(--sightings-muted);
+  font-size: 0.65rem;
+  margin: 0;
+}
+
+.sightings-explorer__badge {
+  flex-shrink: 0;
+  background: #f8f0df;
+  color: #775c20;
+  border-radius: 0.25rem;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+}
+
+.sightings-explorer__controls {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  padding: 0.2rem 1.2rem 0.85rem;
+}
+
+.sightings-explorer__controls label {
+  display: grid;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 7rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+}
+
+.sightings-explorer__controls select,
+.sightings-explorer__reset {
+  font: inherit;
+  font-size: 0.65rem;
+  min-height: 2.2rem;
+  border: 1px solid var(--sightings-border);
+  border-radius: 0.3rem;
+  padding: 0.45rem 0.65rem;
+  color: var(--sightings-ink);
+  background: var(--sightings-paper);
+  cursor: pointer;
+}
+
+.sightings-explorer__controls select:focus-visible,
+.sightings-explorer button:focus-visible {
+  outline: 3px solid #0b625c;
+  outline-offset: 2px;
+}
+
+.sightings-explorer__reset {
+  background: #f3f7f5;
+  font-weight: 600;
+}
+
+.sightings-explorer__summary {
+  padding: 0.55rem 1.2rem;
+  border-top: 1px solid var(--sightings-border);
+  border-bottom: 1px solid var(--sightings-border);
+  font-size: 0.6rem;
+  color: var(--sightings-muted);
+}
+
+.sightings-explorer__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12rem;
+}
+
+.sightings-explorer__map {
+  height: 460px;
+  background: #dcebed;
+  z-index: 0;
+}
+
+.sightings-explorer__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.55rem;
+  border-top: 1px solid var(--sightings-border);
+}
+
+.sightings-explorer__legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.sightings-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #8ba4a3;
+  font: 700 11px/1 system-ui, sans-serif;
+  font-style: normal;
+}
+
+.sightings-marker .sightings-symbol {
+  width: 30px;
+  height: 30px;
+  box-shadow: 0 1px 5px #173b3d55;
+}
+
+.sightings-symbol--srkw {
+  border-radius: 50%;
+  color: #fff;
+  background: #0b625c;
+}
+
+.sightings-symbol--transient {
+  border-radius: 5px;
+  color: #fff;
+  background: #997220;
+}
+
+.sightings-symbol--unresolved {
+  border-radius: 50%;
+  color: #52656c;
+  background: #fff;
+  border: 2px dashed #52656c;
+}
+
+.sightings-explorer__records {
+  min-width: 0;
+  border-left: 1px solid var(--sightings-border);
+}
+
+.sightings-explorer__records-heading {
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--sightings-border);
+}
+
+.md-typeset .sightings-explorer__records-heading h3 {
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sightings-explorer__records-heading > span {
+  color: var(--sightings-muted);
+  font-size: 0.5rem;
+}
+
+.sightings-explorer__list {
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+.sightings-record {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.6rem;
+  text-align: left;
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--sightings-border);
+  font: inherit;
+  color: var(--sightings-ink);
+  cursor: pointer;
+}
+
+.sightings-record:hover,
+.sightings-record[aria-pressed="true"] {
+  background: #edf5f2;
+}
+
+.sightings-record__text {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.sightings-record__text strong {
+  font-size: 0.6rem;
+  font-weight: 600;
+}
+
+.sightings-record__text > span {
+  color: var(--sightings-muted);
+  font-size: 0.5rem;
+}
+
+.md-typeset .sightings-explorer__note,
+.md-typeset .sightings-explorer__network-status,
+.md-typeset .sightings-explorer__empty {
+  font-size: 0.6rem;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0.8rem 1.2rem;
+  border-top: 1px solid var(--sightings-border);
+  color: var(--sightings-muted);
+}
+
+.md-typeset .sightings-explorer__network-status {
+  color: #775c20;
+  background: #f8f0df;
+}
+
+.sightings-popup {
+  color: #173b3d;
+  font: 12px/1.6 system-ui, sans-serif;
+}
+
+.sightings-popup__badge {
+  display: block;
+  color: #775c20;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  margin-bottom: 7px;
+}
+
+.sightings-popup__title {
+  display: block;
+  font-size: 14px;
+}
+
+.md-typeset .sightings-popup p {
+  margin: 4px 0 10px;
+}
+
+.sightings-popup__details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 12px;
+  margin: 0;
+}
+
+.sightings-popup__details dt {
+  color: #557075;
+}
+
+.md-typeset .sightings-popup__details dd {
+  margin: 0;
+}
+
+@media (max-width: 740px) {
+  .sightings-explorer__heading {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sightings-explorer__body {
+    grid-template-columns: 1fr;
+  }
+
+  .sightings-explorer__map {
+    height: 360px;
+  }
+
+  .sightings-explorer__records {
+    border-left: 0;
+    border-top: 1px solid var(--sightings-border);
+  }
+
+  .sightings-explorer__list {
+    max-height: 240px;
+  }
+}
