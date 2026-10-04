@@ -1,0 +1,104 @@
+site_name: Marine Mammal Toolkit
+site_description: Marine-mammal observation and population processing, organized by species
+site_url: https://marinecast.github.io/toolkit-marine-mammals/
+repo_name: MarineCast/toolkit-marine-mammals
+repo_url: https://github.com/MarineCast/toolkit-marine-mammals
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  icon:
+    logo: material/waves
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+plugins:
+  - search
+
+extra_css:
+  - assets/vendor/leaflet/leaflet.css
+  - assets/stylesheets/extra.css
+
+extra_javascript:
+  - assets/vendor/leaflet/leaflet.js
+  - assets/javascripts/sightings-map.js
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
+  - tables
+
+# Theme sources are not downloadable site content.
+exclude_docs: |
+  /overrides/
+
+nav:
+  - Home: index.md
+  - Get started:
+      - Installation: getting-started/installation.md
+      - Choose a workflow: getting-started/workflows.md
+  - Orcas:
+      - species/orcas/index.md
+      - Sightings:
+          - species/orcas/sightings/index.md
+          - Example map: species/orcas/sightings/example-map.md
+          - Observation queries: public-usage.md
+          - Sources and coverage: species/orcas/sightings/sources.md
+          - Processing and imputation: species/orcas/sightings/methods.md
+          - Releases and reports: species/orcas/sightings/products.md
+      - Census:
+          - species/orcas/census/index.md
+          - Workbook guide and API: demography.md
+  - Seals:
+      - species/seals/index.md
+  - Gray whales:
+      - species/gray-whales/index.md
+  - Sea lions:
+      - species/sea-lions/index.md
+  - Humpbacks:
+      - species/humpbacks/index.md
+  - Reference:
+      - Scientific contracts: reference/contracts.md
+      - Architecture and API map: architecture.md
+      - Migration: migration.md
+      - Documentation and Pages: development/documentation.md
+      - Historical OrcaCast references:
+          - Archive guide: reference/orcacast-before-migration/index.md
+          - Whale overview: reference/orcacast-before-migration/whale-overview.md
+          - Sightings sources: reference/orcacast-before-migration/sightings-sources.md
+          - Sightings pipeline: reference/orcacast-before-migration/sightings-pipeline.md
+          - Spatial support: reference/orcacast-before-migration/spatial-support.md
+
+validation:
+  nav:
+    omitted_files: warn
+  links:
+    not_found: warn
+    anchors: warn
+    unrecognized_links: warn

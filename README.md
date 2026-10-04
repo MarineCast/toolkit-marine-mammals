@@ -1,8 +1,22 @@
 # Marine Mammal Toolkit
 
+<img src="docs/assets/marine-mammals-toolkit-banner.png" alt="Ink panorama of orcas, a humpback whale, dolphins, seals, and sea lions in a coastal archipelago" width="100%">
+
 Reusable observation and population processing, with an implemented killer-whale workflow
 extracted from OrcaCast. Distribution: `marine-mammal-toolkit`; import: `marine_mammal_toolkit`.
 Other species remain extension points.
+
+## Documentation
+
+The MkDocs site has separate areas for [orcas](docs/species/orcas/index.md),
+[seals](docs/species/seals/index.md), [gray whales](docs/species/gray-whales/index.md),
+[sea lions](docs/species/sea-lions/index.md), and [humpbacks](docs/species/humpbacks/index.md).
+Orca workflows are implemented; the other areas document the current extension points.
+The Orcas area separates [sightings](docs/species/orcas/sightings/index.md) and
+[census](docs/species/orcas/census/index.md), with an
+[interactive synthetic sightings example](docs/species/orcas/sightings/example-map.md).
+See the [documentation development and GitHub Pages guide](docs/development/documentation.md)
+to preview, validate, and host the site.
 
 ## Package layout
 

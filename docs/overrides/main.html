@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% if page.file.src_path == 'index.md' %}
+  <img class="marine-mammals-hero"
+       src="{{ 'assets/marine-mammals-toolkit-banner.png' | url }}"
+       alt="Ink panorama of orcas, a humpback whale, dolphins, seals, and sea lions in a coastal archipelago; decorative artwork"
+       width="2172" height="724">
+  {% endif %}
+  {{ super() }}
+{% endblock %}

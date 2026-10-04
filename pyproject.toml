@@ -17,6 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "build>=1"]
+docs = ["mkdocs>=1.6,<2", "mkdocs-material>=9.6,<10"]
 report = ["plotly>=5.24"]
 imputation = [
   "toolkit-seascape>=0.1.0", "geopandas>=1.0", "joblib>=1.3",

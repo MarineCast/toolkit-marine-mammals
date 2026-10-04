@@ -1,0 +1,4 @@
+# Documentation-only environment; no data-processing dependencies are needed.
+# Keep these within the docs extra's supported ranges in pyproject.toml.
+mkdocs==1.6.1
+mkdocs-material==9.7.7
