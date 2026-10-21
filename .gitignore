@@ -16,3 +16,4 @@ cache/
 exports/
 reports/
 site/
+.DS_Store

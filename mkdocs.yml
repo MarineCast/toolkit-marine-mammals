@@ -69,6 +69,7 @@ nav:
           - species/orcas/sightings/index.md
           - Example map: species/orcas/sightings/example-map.md
           - Observation queries: public-usage.md
+          - Study delivery adapter: study-delivery.md
           - Sources and coverage: species/orcas/sightings/sources.md
           - Processing and imputation: species/orcas/sightings/methods.md
           - Releases and reports: species/orcas/sightings/products.md
